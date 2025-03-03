@@ -66,9 +66,30 @@ class InterventionsController {
         const vehiculeId = parseInt(req.query.vehiculeId);
         vehicule = await vehiculesService.getVehiculeById(vehiculeId);
 
-        if (vehicule) {
-          // Récupérer le client associé
-          client = await clientsService.getClientById(vehicule.ClientID);
+        if (vehicule && vehicule.ClientID) {
+          try {
+            // Récupérer le client associé au véhicule, avec gestion d'erreur
+            client = await clientsService.getClientById(vehicule.ClientID);
+          } catch (clientError) {
+            console.warn(
+              `Impossible de récupérer le client pour le véhicule ${vehiculeId}:`,
+              clientError
+            );
+            // On continue sans informations client, sans faire échouer la requête
+          }
+        }
+      }
+      // Si un ID client est fourni directement, on le récupère également
+      else if (req.query.clientId) {
+        try {
+          const clientId = parseInt(req.query.clientId);
+          client = await clientsService.getClientById(clientId);
+        } catch (clientError) {
+          console.warn(
+            `Impossible de récupérer le client ${req.query.clientId}:`,
+            clientError
+          );
+          // On continue sans client
         }
       }
 

@@ -1,43 +1,51 @@
 extends ../layout/layout
 
 block content
-  .d-flex.justify-content-between.mb-3
-    h3 Toutes les interventions
+  .flex.justify-between.items-center.gap-2.mb-6
+    .flex.items-center
+      i(data-lucide="wrench", class="h-5 w-5 mr-2 text-accent")
+      h3.font-semibold.text-xl Toutes les interventions
     
-    a.btn.btn-success(href="/interventions/planifier")
-      i.bi.bi-calendar-plus-fill.me-2
-      | Planifier une intervention
+    a.btn.btn-accent(href="/interventions/planifier")
+      i(data-lucide="calendar-plus", class="h-4 w-4 mr-2")
+      span Planifier une intervention
   
   if interventions && interventions.length > 0
-    .table-responsive
-      table.table.table-striped.table-hover
-        thead.table-dark
-          tr
-            th Date
-            th Véhicule
-            th Client
-            th Type
-            th Statut
-            th Prix
-            th Actions
-        tbody
-          each intervention in interventions
+    .card      
+      .table-responsive
+        table.table.table-striped
+          thead
             tr
-              td #{new Date(intervention.Date_Intervention).toLocaleDateString('fr-FR')}
-              td 
-                a(href=`/vehicules/${intervention.VehiculeID}`) #{intervention.Marque} #{intervention.Modele}
-                .small.text-muted #{intervention.Immatriculation}
-              td 
-                a(href=`/clients/${intervention.ClientID}`) #{intervention.Proprietaire}
-              td #{intervention.TypeIntervention}
-              td 
-                span.badge(class=`bg-${intervention.Statut === 'Terminé' ? 'success' : intervention.Statut === 'En cours' ? 'primary' : intervention.Statut === 'Planifié' ? 'warning' : 'secondary'}`) #{intervention.Statut}
-              td #{intervention.Prix.toFixed(2)} €
-              td
-                .btn-group.btn-group-sm
-                  a.btn.btn-primary(href=`/interventions/${intervention.InterventionID}`) Détails
-                  if intervention.Statut !== 'Terminé' && intervention.Statut !== 'Annulé'
-                    a.btn.btn-warning(href=`/interventions/${intervention.InterventionID}/statut`) Modifier statut
+              th Date
+              th Véhicule
+              th Client
+              th Type
+              th Statut
+              th.text-right Prix
+              th Actions
+          tbody
+            each intervention in interventions
+              tr
+                td.whitespace-nowrap #{new Date(intervention.Date_Intervention).toLocaleDateString('fr-FR')}
+                td 
+                  a.text-primary.hover-underline(href=`/vehicules/${intervention.VehiculeID}`) #{intervention.Marque} #{intervention.Modele}
+                  .text-sm.text-muted-foreground #{intervention.Immatriculation}
+                td 
+                  a.text-primary.hover-underline(href=`/clients/${intervention.ClientID}`) #{intervention.Proprietaire}
+                td #{intervention.TypeIntervention}
+                td 
+                  span.badge(class=`badge-${intervention.Statut === 'Terminé' ? 'secondary' : intervention.Statut === 'En cours' ? 'primary' : intervention.Statut === 'Planifié' ? 'badge-Planifié' : intervention.Statut === 'En-attente-de-pièces' ? 'badge-En-attente-de-pièces' : 'badge-outline'}`) #{intervention.Statut}
+                td.text-right.font-medium #{intervention.Prix.toFixed(2)} €
+                td
+                  .flex.gap-1
+                    a.btn.btn-primary.btn-sm(href=`/interventions/${intervention.InterventionID}`)
+                      i(data-lucide="eye", class="h-4 w-4")
+                      span.hidden.desktop-inline Détails
+                    if intervention.Statut !== 'Terminé' && intervention.Statut !== 'Annulé'
+                      a.btn.btn-accent.btn-sm(href=`/interventions/${intervention.InterventionID}/statut`)
+                        i(data-lucide="refresh-cw", class="h-4 w-4")
+                        span.hidden.desktop-inline Statut
   else
-    .alert.alert-info
+    .alert.alert-info.flex.items-center
+      i(data-lucide="info", class="h-5 w-5 mr-2")
       p.mb-0 Aucune intervention n'a été enregistrée.

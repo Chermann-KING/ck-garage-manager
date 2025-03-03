@@ -48,12 +48,12 @@ block content
                 each type in typesInterventions
                   option(value=type.TypeID, data-prix=type.Prix_base) #{type.Nom} (Prix de base: #{type.Prix_base.toFixed(2)} €)
             
-            .grid.grid-cols-1.md\\:grid-cols-2.gap-4.mb-4
+            .grid.grid-cols-1.grid-md-2.gap-4.mb-4
               .space-y-2
                 label.form-label(for="dateIntervention") Date d'intervention *
                 .flex.items-center.form-control.p-0.overflow-hidden
                   i(data-lucide="calendar", class="h-4 w-4 ml-3 text-muted-foreground")
-                  input#dateIntervention.border-0.w-full.p-2.pl-3.focus:outline-none.focus:ring-0(type="date", name="dateIntervention", value=intervention.Date_Intervention, required)
+                  input#dateIntervention.border-0.w-full.p-2.pl-3(type="date", name="dateIntervention", value=intervention.Date_Intervention, required)
               
               .space-y-2
                 label.form-label(for="statut") Statut *
@@ -67,7 +67,7 @@ block content
               label.form-label(for="prix") Prix (€)
               .flex.items-center.form-control.p-0.overflow-hidden
                 i(data-lucide="credit-card", class="h-4 w-4 ml-3 text-muted-foreground")
-                input#prix.border-0.w-full.p-2.pl-3.focus:outline-none.focus:ring-0(type="number", name="prix", step="0.01", min="0", placeholder="Laissez vide pour le prix de base")
+                input#prix.border-0.w-full.p-2.pl-3(type="number", name="prix", step="0.01", min="0", placeholder="Laissez vide pour le prix de base")
               small.form-text Si laissé vide, le prix sera basé sur le type d'intervention
             
             .space-y-2.mb-4
