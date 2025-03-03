@@ -1,0 +1,48 @@
+extends ./layout/layout
+
+block content
+  .grid.grid-cols-1.grid-md-2.gap-6
+    .card
+      .card-header.bg-primary.text-primary-foreground
+        .flex.items-center
+          i(data-lucide="users", class="h-5 w-5 mr-2")
+          h3.font-semibold.text-lg Gestion des clients
+      .card-body
+        p.mb-4 Gérez vos clients, consultez leurs véhicules et leur historique d'interventions.
+        .flex.gap-2
+          a.btn.btn-primary(href="/clients")
+            i(data-lucide="list", class="h-4 w-4 mr-2")
+            span Liste des clients
+          a.btn.btn-secondary(href="/clients/ajouter")
+            i(data-lucide="user-plus", class="h-4 w-4 mr-2")
+            span Ajouter un client
+    
+    .card
+      .card-header.bg-secondary.text-secondary-foreground
+        .flex.items-center
+          i(data-lucide="car", class="h-5 w-5 mr-2")
+          h3.font-semibold.text-lg Gestion des véhicules
+      .card-body
+        p.mb-4 Ajoutez des véhicules pour vos clients et consultez leur historique d'interventions.
+        .flex.gap-2
+          a.btn.btn-primary(href="/vehicules")
+            i(data-lucide="list", class="h-4 w-4 mr-2")
+            span Liste des véhicules
+          a.btn.btn-secondary(href="/vehicules/ajouter")
+            i(data-lucide="plus-circle", class="h-4 w-4 mr-2")
+            span Ajouter un véhicule
+  
+  .card.mt-6
+    .card-header.bg-accent.text-accent-foreground
+      .flex.items-center
+        i(data-lucide="wrench", class="h-5 w-5 mr-2")
+        h3.font-semibold.text-lg Gestion des interventions
+    .card-body
+      p.mb-4 Planifiez et suivez les interventions sur les véhicules de vos clients.
+      .flex.gap-2
+        a.btn.btn-primary(href="/interventions")
+          i(data-lucide="list", class="h-4 w-4 mr-2")
+          span Liste des interventions
+        a.btn.btn-secondary(href="/interventions/planifier")
+          i(data-lucide="calendar-plus", class="h-4 w-4 mr-2")
+          span Planifier une intervention

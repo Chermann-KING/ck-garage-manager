@@ -1,0 +1,93 @@
+extends ../layout/layout
+
+block content
+  .flex.justify-center
+    .w-full.max-w-2xl
+      .card.mb-6
+        .card-header.bg-accent.text-accent-foreground
+          .flex.items-center
+            i(data-lucide="calendar-plus", class="h-5 w-5 mr-2")
+            h3.font-semibold.text-lg Planifier une intervention
+        
+        .card-body
+          if error
+            .alert.alert-danger.mb-4.flex.items-start
+              i(data-lucide="alert-circle", class="h-5 w-5 mr-2 flex-shrink-0 mt-0.5")
+              div #{error}
+          
+          if selectedVehicule
+            .alert.alert-info.mb-6
+              .flex.items-center.mb-1
+                i(data-lucide="car", class="h-5 w-5 mr-2 text-primary")
+                h5.font-medium Véhicule sélectionné:
+              
+              p.mb-1.font-medium
+                | #{selectedVehicule.Marque} #{selectedVehicule.Modele} - 
+                span.badge.badge-outline #{selectedVehicule.Immatriculation}
+              
+              if selectedClient
+                p.mb-0.flex.items-center
+                  i(data-lucide="user", class="h-4 w-4 mr-1 text-muted-foreground")
+                  | #{selectedClient.Prenom} #{selectedClient.Nom}
+          
+          form(method="POST", action="/interventions/planifier")
+            if !selectedVehicule
+              .mb-4
+                label.form-label(for="vehiculeId") Véhicule *
+                select#vehiculeId.form-select(name="vehiculeId", required)
+                  option(value="", disabled, selected) Sélectionnez un véhicule
+                  each vehicule in vehicules
+                    option(value=vehicule.VehiculeID) #{vehicule.Marque} #{vehicule.Modele} - #{vehicule.Immatriculation} (#{vehicule.Proprietaire})
+            else
+              input(type="hidden", name="vehiculeId", value=selectedVehicule.VehiculeID)
+            
+            .mb-4
+              label.form-label(for="typeId") Type d'intervention *
+              select#typeId.form-select(name="typeId", required)
+                option(value="", disabled, selected) Sélectionnez un type d'intervention
+                each type in typesInterventions
+                  option(value=type.TypeID, data-prix=type.Prix_base) #{type.Nom} (Prix de base: #{type.Prix_base.toFixed(2)} €)
+            
+            .grid.grid-cols-1.md\\:grid-cols-2.gap-4.mb-4
+              .space-y-2
+                label.form-label(for="dateIntervention") Date d'intervention *
+                .flex.items-center.form-control.p-0.overflow-hidden
+                  i(data-lucide="calendar", class="h-4 w-4 ml-3 text-muted-foreground")
+                  input#dateIntervention.border-0.w-full.p-2.pl-3.focus:outline-none.focus:ring-0(type="date", name="dateIntervention", value=intervention.Date_Intervention, required)
+              
+              .space-y-2
+                label.form-label(for="statut") Statut *
+                select#statut.form-select(name="statut", required)
+                  option(value="Planifié", selected=intervention.Statut === 'Planifié') Planifié
+                  option(value="En cours", selected=intervention.Statut === 'En cours') En cours
+                  option(value="En attente de pièces", selected=intervention.Statut === 'En attente de pièces') En attente de pièces
+                  option(value="Terminé", selected=intervention.Statut === 'Terminé') Terminé
+            
+            .space-y-2.mb-4
+              label.form-label(for="prix") Prix (€)
+              .flex.items-center.form-control.p-0.overflow-hidden
+                i(data-lucide="credit-card", class="h-4 w-4 ml-3 text-muted-foreground")
+                input#prix.border-0.w-full.p-2.pl-3.focus:outline-none.focus:ring-0(type="number", name="prix", step="0.01", min="0", placeholder="Laissez vide pour le prix de base")
+              small.form-text Si laissé vide, le prix sera basé sur le type d'intervention
+            
+            .space-y-2.mb-4
+              label.form-label(for="description") Description
+              textarea#description.form-control(name="description", rows="4")= intervention.Description
+            
+            if selectedVehicule
+              .form-check.mb-4
+                input#returnToVehicule.form-check-input(type="checkbox", name="returnToVehicule", value="1", checked)
+                label.form-check-label(for="returnToVehicule") Retourner à la fiche véhicule après la planification
+            
+            .flex.justify-between.mt-6
+              a.btn.btn-outline(href=selectedVehicule ? `/vehicules/${selectedVehicule.VehiculeID}` : "/interventions")
+                i(data-lucide="x", class="h-4 w-4 mr-2")
+                span Annuler
+              
+              button.btn.btn-primary(type="submit")
+                i(data-lucide="check", class="h-4 w-4 mr-2")
+                span Planifier l'intervention
+        
+        .card-footer.text-sm.text-muted-foreground.flex.items-center
+          i(data-lucide="asterisk", class="h-3 w-3 mr-1")
+          | Champs obligatoires

@@ -1,0 +1,58 @@
+extends ../layout/layout
+
+block content
+  .row
+    .col-md-8.offset-md-2
+      .card.mb-4
+        .card-header.bg-warning.text-dark
+          i.bi.bi-pencil-square.me-2
+          | Mise à jour du statut - Intervention ##{intervention.InterventionID}
+      
+        .card-body
+          if error
+            .alert.alert-danger.mb-4
+              i.bi.bi-exclamation-triangle-fill.me-2
+              | #{error}
+          
+          .alert.alert-info.mb-4
+            h5 Informations sur l'intervention
+            .row.mb-2
+              .col-md-6
+                p.mb-1
+                  strong Véhicule:
+                  |  #{intervention.Marque} #{intervention.Modele} - #{intervention.Immatriculation}
+                p.mb-1
+                  strong Propriétaire:
+                  |  #{intervention.Proprietaire}
+              .col-md-6
+                p.mb-1
+                  strong Type:
+                  |  #{intervention.TypeIntervention}
+                p.mb-1
+                  strong Date:
+                  |  #{new Date(intervention.Date_Intervention).toLocaleDateString('fr-FR')}
+            .row
+              .col-12
+                p.mb-0
+                  strong Statut actuel:
+                  span.badge.ms-2(class=`bg-${intervention.Statut === 'Terminé' ? 'success' : intervention.Statut === 'En cours' ? 'primary' : intervention.Statut === 'Planifié' ? 'warning' : 'secondary'}`) #{intervention.Statut}
+          
+          form(method="POST", action=`/interventions/${intervention.InterventionID}/statut`)
+            .mb-3
+              label.form-label(for="statut") Nouveau statut *
+              select#statut.form-select(name="statut", required)
+                each statut in statuts
+                  option(value=statut, selected=intervention.Statut === statut) #{statut}
+            
+            .mb-3
+              label.form-label(for="description") Description / Commentaire
+              textarea#description.form-control(name="description", rows="4")= intervention.Description
+              small.form-text.text-muted Ajoutez un commentaire ou modifiez la description existante
+            
+            .d-flex.justify-content-between.mt-4
+              a.btn.btn-secondary(href=`/interventions/${intervention.InterventionID}`)
+                i.bi.bi-x-circle.me-2
+                | Annuler
+              button.btn.btn-success(type="submit")
+                i.bi.bi-check-circle.me-2
+                | Mettre à jour le statut

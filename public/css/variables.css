@@ -1,0 +1,117 @@
+/* 
+Définit les variables CSS pour les couleurs et éléments du thème, avec des configurations pour le mode clair et sombre.
+ */
+
+/* @layer base {
+    :root {
+        --background: 296 56% 99%;
+        --foreground: 296 54% 0%;
+        --muted: 116 25% 93%;
+        --muted-foreground: 116 0% 38%;
+        --popover: 296 56% 99%;
+        --popover-foreground: 296 54% 0%;
+        --card: 296 56% 98%;
+        --card-foreground: 0 0% 0%;
+        --border: 296 10% 91%;
+        --input: 296 10% 91%;
+        --primary: 296 8% 39%;
+        --primary-foreground: 296 8% 99%;
+        --secondary: 116 8% 39%;
+        --secondary-foreground: 0 0% 100%;
+        --accent: 116 8% 39%;
+        --accent-foreground: 0 0% 100%;
+        --destructive: 3 96% 20%;
+        --destructive-foreground: 3 96% 80%;
+        --ring: 296 8% 39%;
+        --chart-1: 296 8% 39%;
+        --chart-2: 116 8% 39%;
+        --chart-3: 116 8% 39%;
+        --chart-4: 116 8% 42%;
+        --chart-5: 296 11% 39%;
+        --radius: 0.5rem;
+    }
+
+    .dark {
+        --background: 296 37% 0%;
+        --foreground: 296 37% 100%;
+        --muted: 116 25% 7%;
+        --muted-foreground: 116 0% 62%;
+        --popover: 296 37% 0%;
+        --popover-foreground: 296 37% 100%;
+        --card: 0 0% 1%;
+        --card-foreground: 0 0% 100%;
+        --border: 296 10% 12%;
+        --input: 296 10% 12%;
+        --primary: 296 8% 39%;
+        --primary-foreground: 296 8% 99%;
+        --secondary: 116 8% 39%;
+        --secondary-foreground: 0 0% 100%;
+        --accent: 116 8% 39%;
+        --accent-foreground: 0 0% 100%;
+        --destructive: 3 96% 57%;
+        --destructive-foreground: 0 0% 100%;
+        --ring: 296 8% 39%;
+        --chart-1: 296 8% 39%;
+        --chart-2: 116 8% 39%;
+        --chart-3: 116 8% 39%;
+        --chart-4: 116 8% 42%;
+        --chart-5: 296 11% 39%;
+    }
+} */
+
+@layer base {
+    :root {
+        --background: 125 68% 98%;
+        --foreground: 125 68% 3%;
+        --muted: 125 32% 89%;
+        --muted-foreground: 125 13% 32%;
+        --popover: 125 68% 98%;
+        --popover-foreground: 125 68% 3%;
+        --card: 125 68% 97%;
+        --card-foreground: 125 68% 2%;
+        --border: 125 14% 88%;
+        --input: 125 14% 88%;
+        --primary: 125 62% 15%;
+        --primary-foreground: 125 62% 55%;
+        --secondary: 125 15% 82%;
+        --secondary-foreground: 125 15% 22%;
+        --accent: 125 15% 82%;
+        --accent-foreground: 125 15% 22%;
+        --destructive: 15 88% 26%;
+        --destructive-foreground: 15 88% 86%;
+        --ring: 125 62% 15%;
+        --chart-1: 125 62% 15%;
+        --chart-2: 125 15% 82%;
+        --chart-3: 125 15% 82%;
+        --chart-4: 125 15% 85%;
+        --chart-5: 125 65% 15%;
+        --radius: 0.5rem;
+    }
+
+    .dark {
+        --background: 125 46% 3%;
+        --foreground: 125 10% 100%;
+        --muted: 125 32% 11%;
+        --muted-foreground: 125 13% 68%;
+        --popover: 125 46% 3%;
+        --popover-foreground: 125 10% 100%;
+        --card: 125 46% 4%;
+        --card-foreground: 0 0% 100%;
+        --border: 125 14% 11%;
+        --input: 125 14% 11%;
+        --primary: 125 62% 15%;
+        --primary-foreground: 125 62% 55%;
+        --secondary: 125 1% 20%;
+        --secondary-foreground: 125 1% 80%;
+        --accent: 125 1% 20%;
+        --accent-foreground: 125 1% 80%;
+        --destructive: 15 88% 54%;
+        --destructive-foreground: 0 0% 100%;
+        --ring: 125 62% 15%;
+        --chart-1: 125 62% 15%;
+        --chart-2: 125 1% 20%;
+        --chart-3: 125 1% 20%;
+        --chart-4: 125 1% 23%;
+        --chart-5: 125 65% 15%;
+    }
+}

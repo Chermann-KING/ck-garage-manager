@@ -1,0 +1,43 @@
+extends ../layout/layout
+
+block content
+  .d-flex.justify-content-between.mb-3
+    h3 Toutes les interventions
+    
+    a.btn.btn-success(href="/interventions/planifier")
+      i.bi.bi-calendar-plus-fill.me-2
+      | Planifier une intervention
+  
+  if interventions && interventions.length > 0
+    .table-responsive
+      table.table.table-striped.table-hover
+        thead.table-dark
+          tr
+            th Date
+            th Véhicule
+            th Client
+            th Type
+            th Statut
+            th Prix
+            th Actions
+        tbody
+          each intervention in interventions
+            tr
+              td #{new Date(intervention.Date_Intervention).toLocaleDateString('fr-FR')}
+              td 
+                a(href=`/vehicules/${intervention.VehiculeID}`) #{intervention.Marque} #{intervention.Modele}
+                .small.text-muted #{intervention.Immatriculation}
+              td 
+                a(href=`/clients/${intervention.ClientID}`) #{intervention.Proprietaire}
+              td #{intervention.TypeIntervention}
+              td 
+                span.badge(class=`bg-${intervention.Statut === 'Terminé' ? 'success' : intervention.Statut === 'En cours' ? 'primary' : intervention.Statut === 'Planifié' ? 'warning' : 'secondary'}`) #{intervention.Statut}
+              td #{intervention.Prix.toFixed(2)} €
+              td
+                .btn-group.btn-group-sm
+                  a.btn.btn-primary(href=`/interventions/${intervention.InterventionID}`) Détails
+                  if intervention.Statut !== 'Terminé' && intervention.Statut !== 'Annulé'
+                    a.btn.btn-warning(href=`/interventions/${intervention.InterventionID}/statut`) Modifier statut
+  else
+    .alert.alert-info
+      p.mb-0 Aucune intervention n'a été enregistrée.

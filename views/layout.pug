@@ -1,0 +1,60 @@
+doctype html
+html(lang="fr")
+  head
+    meta(charset="UTF-8")
+    meta(name="viewport", content="width=device-width, initial-scale=1.0")
+    title #{title} | CK Garage
+    link(rel="stylesheet", href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css")
+    link(rel="stylesheet", href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css")
+    link(rel="stylesheet", href="/css/style.css")
+  body
+    nav.navbar.navbar-expand-lg.navbar-dark.bg-dark.mb-4
+      .container
+        a.navbar-brand(href="/") CK Garage
+        button.navbar-toggler(type="button", data-bs-toggle="collapse", data-bs-target="#navbarNav")
+          span.navbar-toggler-icon
+        #navbarNav.collapse.navbar-collapse
+          ul.navbar-nav.me-auto
+            li.nav-item
+              a.nav-link(href="/") Accueil
+            li.nav-item.dropdown
+              a.nav-link.dropdown-toggle(href="#", data-bs-toggle="dropdown") Clients
+              ul.dropdown-menu
+                li
+                  a.dropdown-item(href="/clients") Liste des clients
+                li
+                  a.dropdown-item(href="/clients?sort=vehicules") Clients par nb. de véhicules
+                li
+                  a.dropdown-item(href="/clients/ajouter") Ajouter un client
+            li.nav-item.dropdown
+              a.nav-link.dropdown-toggle(href="#", data-bs-toggle="dropdown") Véhicules
+              ul.dropdown-menu
+                li
+                  a.dropdown-item(href="/vehicules") Liste des véhicules
+                li
+                  a.dropdown-item(href="/vehicules?sort=type") Véhicules par type
+                li
+                  a.dropdown-item(href="/vehicules/ajouter") Ajouter un véhicule
+            li.nav-item.dropdown
+              a.nav-link.dropdown-toggle(href="#", data-bs-toggle="dropdown") Interventions
+              ul.dropdown-menu
+                li
+                  a.dropdown-item(href="/interventions") Liste des interventions
+                li
+                  a.dropdown-item(href="/interventions/planifier") Planifier une intervention
+    
+    .container
+      if locals.flashMessage
+        .alert(class=`alert-${locals.flashMessage.type}`)
+          = locals.flashMessage.text
+      
+      h1.mb-4 #{title}
+      
+      block content
+    
+    footer.footer.mt-5.py-3.bg-light
+      .container.text-center
+        p.text-muted © 2025 Gestion de Garage
+    
+    script(src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js")
+    script(src="/js/main.js")

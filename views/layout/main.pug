@@ -1,0 +1,9 @@
+main.container.mx-auto.px-4.py-6.min-h-screen
+    if locals.flashMessage
+        .alert.mb-6.p-4.rounded-md.border.flex.items-start(class=`${locals.flashMessage.type === 'success' ? 'alert-success' : locals.flashMessage.type === 'danger' ? 'alert-danger' : locals.flashMessage.type === 'warning' ? 'alert-warning' : 'alert-info'}`)
+          i(data-lucide=`${locals.flashMessage.type === 'success' ? 'check-circle' : locals.flashMessage.type === 'danger' ? 'alert-circle' : 'alert-triangle'}`, class="h-5 w-5 mr-2 flex-shrink-0 mt-0.5")
+          div= locals.flashMessage.text
+
+    h1.page-title.font-bold.mb-6 #{title}
+
+    block content

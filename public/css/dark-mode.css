@@ -1,0 +1,72 @@
+/* 
+Contient les styles spécifiques au mode sombre avec des bascules d'affichage et des variations de couleurs pour ce mode.
+*/
+
+/* Bascule d'affichage du thème */
+html.dark .theme-dark {
+    display: block !important;
+}
+
+html.dark .theme-light {
+    display: none !important;
+}
+
+html:not(.dark) .theme-dark {
+    display: none !important;
+}
+
+html:not(.dark) .theme-light {
+    display: block !important;
+}
+
+/* Blocs en mode sombre */
+.dark-block {
+    display: none;
+}
+
+.dark .dark-block {
+    display: block;
+}
+
+.dark .light-block {
+    display: none;
+}
+
+/* Couleurs spécifiques au mode sombre*/
+.dark .dark-bg-card {
+    background-color: hsl(var(--card));
+}
+
+.dark .dark-text-foreground {
+    color: hsl(var(--foreground));
+}
+
+.dark .dark-border-border {
+    border-color: hsl(var(--border));
+}
+
+.dark .dark-bg-muted {
+    background-color: hsl(var(--muted));
+}
+
+/* Couleurs de l'état du mode sombre */
+.dark .dark-bg-Planifié {
+    background-color: rgba(255, 193, 7, 0.6);
+    color: #000;
+}
+
+.dark .dark-bg-En-cours {
+    background-color: hsl(var(--primary) / 0.8);
+}
+
+.dark .dark-bg-Terminé {
+    background-color: hsl(var(--secondary) / 0.8);
+}
+
+.dark .dark-bg-Annulé {
+    background-color: #5a6268;
+}
+
+.dark .dark-bg-En-attente-de-pièces {
+    background-color: #593d9e;
+}

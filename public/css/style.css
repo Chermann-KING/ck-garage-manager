@@ -1,0 +1,83 @@
+/* Styles personnalisés pour l'application de gestion de garage */
+
+body {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.container {
+    flex: 1;
+}
+
+.footer {
+    margin-top: auto;
+}
+
+/* Style pour les cartes */
+.card {
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    margin-bottom: 1.5rem;
+}
+
+.card-header h3 {
+    margin-bottom: 0;
+}
+
+/* Style pour les badges */
+.badge {
+    font-weight: 500;
+    letter-spacing: 0.03em;
+}
+
+/* Style pour les tableaux */
+.table-responsive {
+    border-radius: 0.25rem;
+    overflow: hidden;
+}
+
+/* Style pour les formulaires */
+.form-label {
+    font-weight: 500;
+}
+
+.form-control:focus,
+.form-select:focus {
+    border-color: #80bdff;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+/* Style pour les boutons */
+.btn {
+    font-weight: 500;
+}
+
+.btn-group {
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+}
+
+/* Style pour les alertes */
+.alert {
+    border-radius: 0.25rem;
+}
+
+/* Styles pour les statuts */
+.bg-Planifié {
+    background-color: #ffc107;
+}
+
+.bg-En-cours {
+    background-color: #007bff;
+}
+
+.bg-Terminé {
+    background-color: #28a745;
+}
+
+.bg-Annulé {
+    background-color: #6c757d;
+}
+
+.bg-En-attente-de-pièces {
+    background-color: #6f42c1;
+}

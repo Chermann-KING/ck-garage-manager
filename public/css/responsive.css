@@ -1,0 +1,160 @@
+/* 
+Gère les styles pour l'affichage responsive, principalement avec une approche "mobile-first" et des media queries pour l' affichage desktop.
+*/
+
+/* Default (mobile first) */
+.desktop-block,
+.desktop-flex,
+.desktop-inline {
+    display: none;
+}
+
+.mobile-only {
+    display: flex;
+}
+
+.desktop-only {
+    display: none;
+}
+
+/* Desktop media query */
+@media (min-width: 768px) {
+
+    /* Display classes */
+    .desktop-block {
+        display: block;
+    }
+
+    .desktop-flex {
+        display: flex;
+    }
+
+    .desktop-inline {
+        display: inline;
+    }
+
+    .mobile-only {
+        display: none;
+    }
+
+    .desktop-only {
+        display: flex;
+    }
+
+    .order-first-mobile {
+        order: 0;
+    }
+
+    .order-last-mobile {
+        order: 0;
+    }
+
+    .desktop-order-first {
+        order: -1;
+    }
+
+    .desktop-order-last {
+        order: 999;
+    }
+
+    /* Navigation */
+    .nav-mobile-toggle {
+        display: none;
+    }
+
+    .nav-menu {
+        display: flex !important;
+        width: auto;
+    }
+
+    .menu-items {
+        flex-direction: row;
+        align-items: center;
+    }
+
+    .submenu {
+        display: none;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        min-width: 200px;
+    }
+
+    .group:hover .submenu {
+        display: block;
+    }
+
+    .desktop-menu {
+        display: block;
+    }
+
+    /* Typography */
+    .page-title {
+        font-size: 1.875rem;
+        line-height: 2.25rem;
+    }
+
+    /* Grid */
+    .grid-md-1 {
+        grid-template-columns: repeat(1, minmax(0, 1fr));
+    }
+
+    .grid-md-2 {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .grid-md-3 {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .grid-md-4 {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+
+    .grid-md-5 {
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+    }
+
+    .grid-md-6 {
+        grid-template-columns: repeat(6, minmax(0, 1fr));
+    }
+
+    /* Alignment */
+    .desktop-justify-start {
+        justify-content: flex-start;
+    }
+
+    .desktop-justify-end {
+        justify-content: flex-end;
+    }
+
+    .desktop-justify-center {
+        justify-content: center;
+    }
+
+    .desktop-items-center {
+        align-items: center;
+    }
+
+    .desktop-items-start {
+        align-items: flex-start;
+    }
+
+    /* Width */
+    .w-md-auto {
+        width: auto;
+    }
+
+    /* Text alignment */
+    .text-md-left {
+        text-align: left;
+    }
+
+    .text-md-right {
+        text-align: right;
+    }
+
+    .text-md-center {
+        text-align: center;
+    }
+}

@@ -1,0 +1,17 @@
+extends ./layout/layout
+
+block content
+  .flex.items-center.justify-center
+    .w-full.max-w-md
+      .card.border.border-destructive
+        .card-header.bg-destructive.text-destructive-foreground
+          .flex.items-center
+            i(data-lucide="alert-triangle", class="h-5 w-5 mr-2")
+            h3.font-semibold.text-lg Erreur
+        .card-body
+          h2.text-xl.font-bold.mb-2= title
+          p.mb-6= message
+          .flex.justify-center
+            a.btn.btn-primary(href="/")
+              i(data-lucide="home", class="h-4 w-4 mr-2")
+              span Retour à l'accueil

@@ -1,0 +1,26 @@
+{
+  "name": "ck_garage_management",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node --env-file=.env index.js",
+    "dev": "node --env-file=.env --watch index.js"
+  },
+  "keywords": [
+    "express",
+    "node",
+    "pug",
+    "mssql"
+  ],
+  "author": "Chermann KING",
+  "license": "ISC",
+  "description": "Application de gestion de garage",
+  "dependencies": {
+    "body-parser": "^1.20.3",
+    "express": "^4.21.2",
+    "express-session": "^1.18.1",
+    "mssql": "^11.0.1",
+    "pug": "^3.0.3"
+  }
+}

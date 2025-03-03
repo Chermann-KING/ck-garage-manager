@@ -1,0 +1,48 @@
+extends ../layout/layout
+
+block content
+  .flex.justify-center
+    .w-full.max-w-2xl
+      .card.mb-6
+        .card-header.bg-primary.text-primary-foreground
+          .flex.items-center
+            i(data-lucide="user", class="h-5 w-5 mr-2")
+            h3.font-semibold.text-lg #{isNew ? 'Ajouter un client' : 'Modifier un client'}
+        
+        .card-body
+          if error
+            .alert.alert-danger.mb-4.flex.items-start
+              i(data-lucide="alert-circle", class="h-5 w-5 mr-2 flex-shrink-0 mt-0.5")
+              div #{error}
+          
+          form(method="POST", action=isNew ? "/clients/ajouter" : `/clients/${client.ClientID}/modifier`)
+            .grid.grid-cols-1.grid-md-2.gap-4.mb-4
+              .space-y-2
+                label.form-label(for="nom") Nom *
+                input#nom.form-control(type="text", name="nom", value=client.Nom || '', required)
+              
+              .space-y-2
+                label.form-label(for="prenom") Prénom *
+                input#prenom.form-control(type="text", name="prenom", value=client.Prenom || '', required)
+            
+            .grid.grid-cols-1.grid-md-2.gap-4.mb-6
+              .space-y-2
+                label.form-label(for="telephone") Téléphone
+                .flex.items-center.form-control.p-0.overflow-hidden
+                  i(data-lucide="phone", class="h-4 w-4 ml-3 text-muted-foreground")
+                  input#telephone.border-0.w-full.p-2.pl-3.no-focus.no-ring(type="tel", name="telephone", value=client.Telephone || '')
+              
+              .space-y-2
+                label.form-label(for="email") Email
+                .flex.items-center.form-control.p-0.overflow-hidden
+                  i(data-lucide="mail", class="h-4 w-4 ml-3 text-muted-foreground")
+                  input#email.border-0.w-full.p-2.pl-3.no-focus.no-ring(type="email", name="email", value=client.Email || '')
+            
+            .flex.justify-between.mt-6
+              a.btn.btn-outline(href=isNew ? "/clients" : `/clients/${client.ClientID}`)
+                i(data-lucide="x", class="h-4 w-4 mr-2")
+                span Annuler
+              
+              button.btn.btn-primary(type="submit")
+                i(data-lucide="check", class="h-4 w-4 mr-2")
+                span #{isNew ? 'Ajouter' : 'Enregistrer les modifications'}

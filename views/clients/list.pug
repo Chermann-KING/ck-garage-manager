@@ -1,0 +1,66 @@
+extends ../layout/layout
+
+block content
+  .flex.justify-between.items-center.gap-2.mb-6
+    .btn-group
+      a.btn.btn-outline-primary(href="/clients", class=(sortByVehicles ? "" : "active")) Par A → Z
+      a.btn.btn-outline-primary(href="/clients?sort=vehicules", class=(sortByVehicles ? "active" : "")) Par Qté véhicules
+    
+    a.btn.btn-secondary(href="/clients/ajouter")
+      i(data-lucide="user-plus", class="h-4 w-4 mr-2")
+      span Ajouter un client
+  
+  .card
+    <!--En-tête de la carte-->
+    .card-header.bg-muted-light.hidden.desktop-inline
+      .grid.grid-cols-1.grid-md-4.gap-4.items-center.w-full
+        .text-muted-foreground Nom
+        .text-muted-foreground Contact
+        .text-muted-foreground Véhicules
+        .text-muted-foreground.text-center Actions
+    
+    <!--Contenu de la carte-->
+    if clients && clients.length > 0
+      ul.divide-y.divide-border
+        each client in clients
+          .py-4.px-4.transition.hover-bg-muted
+            .grid.grid-cols-1.grid-md-4.gap-4.items-center
+              <!--Nom du client-->
+              .flex.flex-col
+                h5.font-medium.text-lg.mb-0 #{client.Nom} #{client.Prenom}
+
+              <!--Contact du client-->
+              .flex.flex-col.space-y-1
+                if client.Telephone
+                  .flex.items-center
+                    i(data-lucide="phone", class="h-4 w-4 mr-2 text-muted-foreground")
+                    span #{client.Telephone}
+                if client.Email
+                  .flex.items-center
+                    i(data-lucide="mail", class="h-4 w-4 mr-2 text-muted-foreground")
+                    span.truncate #{client.Email}
+
+              <!--Badge nombre de véhicule du client-->
+              div
+                .badge.badge-primary.px-3.py-2 #{client.NombreVehicules} #{client.NombreVehicules > 1 ? 'véhicules' : 'véhicule'}
+
+              <!--Actions-->
+              .flex.items-center.justify-end.gap-2.order-first-mobile
+                <!--Action Détails d'un véhicule-->
+                a.btn.btn-primary.btn-sm(href=`/clients/${client.ClientID}`)
+                  i(data-lucide="info", class="h-4 w-4 mr-1")
+                  span.hidden.desktop-inline Détails
+                
+                <!--Action Ajouter un véhicule-->
+                a.btn.btn-secondary.btn-sm(href=`/vehicules/ajouter?clientId=${client.ClientID}`)
+                  i(data-lucide="plus-circle", class="h-4 w-4 mr-1")
+                  span.hidden.desktop-inline Véhicule
+                
+                <!--Action Modifier un client-->
+                a.btn.btn-outline.btn-sm(href=`/clients/${client.ClientID}/modifier`)
+                  i(data-lucide="pencil", class="h-4 w-4")
+                  span.hidden.desktop-inline Modifier
+    else
+      .p-8.text-center
+        i(data-lucide="users", class="h-10 w-10 mx-auto mb-3 text-muted-foreground")
+        p.text-muted-foreground Aucun client enregistré

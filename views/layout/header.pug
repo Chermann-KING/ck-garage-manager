@@ -1,0 +1,54 @@
+header.sticky.top-0.z-10.w-full.border-b.border-border.bg-card
+  .container.mx-auto.px-4.py-3
+    nav.flex.items-center.justify-between
+          a.text-xl.font-bold.text-primary(href="/") CK Garage
+
+          button.p-2.bg-muted.rounded-md.nav-mobile-toggle(type="button", data-toggle="collapse", data-target="#navbarMenu", aria-expanded="false")
+            i(data-lucide="menu", class="h-5 w-5")
+
+          #navbarMenu.nav-menu.hidden
+            ul.flex.flex-col.menu-items.gap-1
+              li
+                a.block.px-3.py-2.rounded-md.nav-link(href="/") Accueil
+              
+              li.relative.group
+                a.flex.items-center.px-3.py-2.rounded-md.nav-link(href="#", data-dropdown="clients")
+                  span Clients
+                  i(data-lucide="chevron-down", class="ml-1 h-4 w-4")
+
+                ul.dropdown-menu.hidden.submenu.rounded-md.border.border-border.bg-popover.shadow-md
+                  li
+                    a.block.px-3.py-2.rounded-sm.nav-link(href="/clients") Liste des clients
+                  li
+                    a.block.px-3.py-2.rounded-sm.nav-link(href="/clients?sort=vehicules") Clients par nb. de véhicules
+                  li
+                    a.block.px-3.py-2.rounded-sm.nav-link(href="/clients/ajouter") Ajouter un client
+              
+              li.relative.group
+                a.flex.items-center.px-3.py-2.rounded-md.nav-link(href="#", data-dropdown="vehicules")
+                  span Véhicules
+                  i(data-lucide="chevron-down", class="ml-1 h-4 w-4")
+                
+                ul.dropdown-menu.hidden.submenu.rounded-md.border.border-border.bg-popover.shadow-md
+                  li
+                    a.block.px-3.py-2.rounded-sm.nav-link(href="/vehicules") Liste des véhicules
+                  li
+                    a.block.px-3.py-2.rounded-sm.nav-link(href="/vehicules?sort=type") Véhicules par type
+                  li
+                    a.block.px-3.py-2.rounded-sm.nav-link(href="/vehicules/ajouter") Ajouter un véhicule
+              
+              li.relative.group
+                a.flex.items-center.px-3.py-2.rounded-md.nav-link(href="#", data-dropdown="interventions")
+                  span Interventions
+                  i(data-lucide="chevron-down", class="ml-1 h-4 w-4")
+                
+                ul.dropdown-menu.hidden.submenu.rounded-md.border.border-border.bg-popover.shadow-md
+                  li
+                    a.block.px-3.py-2.rounded-sm.nav-link(href="/interventions") Liste des interventions
+                  li
+                    a.block.px-3.py-2.rounded-sm.nav-link(href="/interventions/planifier") Planifier une intervention
+
+          button#theme-toggle.p-2.rounded-full.bg-muted.text-muted-foreground.cursor-pointer(aria-label="Toggle theme")
+            i(data-lucide="moon", class="h-5 w-5 theme-dark hidden")
+            i(data-lucide="sun", class="h-5 w-5 theme-light")
+    

@@ -1,0 +1,87 @@
+extends ../layout/layout
+
+block content
+  .card.mb-6
+    .card-header.bg-accent.text-accent-foreground
+      .flex.justify-between.items-center
+        .flex.items-center
+          i(data-lucide="wrench", class="h-5 w-5 mr-2")
+          h3.font-semibold.text-lg Intervention ##{intervention.InterventionID}
+        .flex.gap-2
+          if intervention.Statut !== 'Terminé' && intervention.Statut !== 'Annulé'
+            a.btn.btn-ghost.text-accent-foreground(href=`/interventions/${intervention.InterventionID}/statut`)
+              i(data-lucide="pencil", class="h-4 w-4 mr-1")
+              span Modifier statut
+          a.btn.btn-ghost.text-accent-foreground(href='/interventions')
+            i(data-lucide="arrow-left", class="h-4 w-4 mr-1")
+            span Retour à la liste
+    
+    .card-body
+      .grid.grid-cols-1.grid-md-2.gap-6.mb-6
+        .card.card-primary
+          .card-body
+            h5.font-semibold.mb-3 Informations générales
+            .flex.items-start.mb-2
+              i(data-lucide="calendar", class="h-4 w-4 mr-2 mt-1 text-muted-foreground")
+              div
+                p.font-medium.mb-1 Date
+                p.text-lg #{new Date(intervention.Date_Intervention).toLocaleDateString('fr-FR')}
+            .flex.items-start.mb-2
+              i(data-lucide="tool", class="h-4 w-4 mr-2 mt-1 text-muted-foreground")
+              div
+                p.font-medium.mb-1 Type
+                p.text-lg #{intervention.TypeIntervention}
+            .flex.items-start.mb-2
+              i(data-lucide="activity", class="h-4 w-4 mr-2 mt-1 text-muted-foreground")
+              div
+                p.font-medium.mb-1 Statut
+                p
+                  span.badge.px-3.py-1(class=`${intervention.Statut === 'Terminé' ? 'badge-secondary' : intervention.Statut === 'En cours' ? 'badge-primary' : intervention.Statut === 'Planifié' ? 'badge-Planifié' : 'badge-outline'}`) #{intervention.Statut}
+            .flex.items-start
+              i(data-lucide="credit-card", class="h-4 w-4 mr-2 mt-1 text-muted-foreground")
+              div
+                p.font-medium.mb-1 Prix
+                p.text-lg.font-medium #{intervention.Prix.toFixed(2)} €
+        
+        .card.card-secondary
+          .card-body
+            h5.font-semibold.mb-3 Véhicule
+            .flex.items-start.mb-2
+              i(data-lucide="car", class="h-4 w-4 mr-2 mt-1 text-muted-foreground")
+              div
+                p.font-medium.mb-1 Marque / Modèle
+                p.text-lg
+                  a.text-secondary.link-hover(href=`/vehicules/${intervention.VehiculeID}`) #{intervention.Marque} #{intervention.Modele}
+            .flex.items-start.mb-2
+              i(data-lucide="tag", class="h-4 w-4 mr-2 mt-1 text-muted-foreground")
+              div
+                p.font-medium.mb-1 Immatriculation
+                p
+                  span.badge.badge-outline.px-3.py-1 #{intervention.Immatriculation}
+            .flex.items-start
+              i(data-lucide="user", class="h-4 w-4 mr-2 mt-1 text-muted-foreground")
+              div
+                p.font-medium.mb-1 Propriétaire
+                p.text-lg
+                  a.text-primary.link-hover(href=`/clients/${intervention.ClientID}`) #{intervention.Proprietaire}
+      
+      .card.bg-muted-light.mb-4
+        .card-body
+          .flex.items-start
+            i(data-lucide="file-text", class="h-5 w-5 mr-2 mt-1 text-muted-foreground")
+            div
+              h5.font-semibold.mb-2 Description
+              if intervention.Description
+                p.mb-0 #{intervention.Description}
+              else
+                p.text-muted-foreground.mb-0 Aucune description fournie.
+      
+      .flex.justify-between.mt-6
+        a.btn.btn-secondary(href=`/vehicules/${intervention.VehiculeID}`)
+          i(data-lucide="car", class="h-4 w-4 mr-2")
+          span Voir le véhicule
+        
+        if intervention.Statut !== 'Terminé' && intervention.Statut !== 'Annulé'
+          a.btn.btn-accent(href=`/interventions/${intervention.InterventionID}/statut`)
+            i(data-lucide="refresh-cw", class="h-4 w-4 mr-2")
+            span Mettre à jour le statut
