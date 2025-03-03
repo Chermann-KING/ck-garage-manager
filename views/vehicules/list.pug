@@ -1,46 +1,49 @@
-extends ../layout
+extends ../layout/layout
 
 block content
-  .d-flex.justify-content-between.mb-3
+  .flex.justify-between.items-center.gap-2.mb-6
     .btn-group
       a.btn.btn-outline-primary(href="/vehicules", class=(sortByType ? "" : "active")) Liste standard
       a.btn.btn-outline-primary(href="/vehicules?sort=type", class=(sortByType ? "active" : "")) Par marque
     
-    a.btn.btn-success(href="/vehicules/ajouter")
-      i.bi.bi-plus-circle-fill.me-2
-      | Ajouter un véhicule
+    a.btn.btn-secondary(href="/vehicules/ajouter")
+      i(data-lucide="plus-circle", class="h-4 w-4 mr-2")
+      span Ajouter un véhicule
   
   .card
-    .card-header
-      .row
-        .col-md-3
-          strong Véhicule
-        .col-md-2
-          strong Immatriculation
-        .col-md-2
-          strong Année
-        .col-md-3
-          strong Propriétaire
-        .col-md-2
-          strong Actions
+    .card-header.bg-muted-light.hidden.desktop-inline
+      .grid.grid-cols-1.grid-md-5.gap-4.items-center.w-full
+        .text-muted-foreground Véhicule
+        .text-muted-foreground Immatriculation
+        .text-muted-foreground Année
+        .text-muted-foreground Propriétaire
+        .text-muted-foreground.text-right Actions
     
-    .list-group.list-group-flush
-      if vehicules && vehicules.length > 0
+    if vehicules && vehicules.length > 0
+      ul.divide-y.divide-border
         each vehicule in vehicules
-          .list-group-item
-            .row.align-items-center
-              .col-md-3
-                h5.mb-0 #{vehicule.Marque} #{vehicule.Modele}
-              .col-md-2
-                span.badge.bg-secondary.px-3.py-2 #{vehicule.Immatriculation}
-              .col-md-2
-                | #{vehicule.Annee || 'Non renseignée'}
-              .col-md-3
-                a(href=`/clients/${vehicule.ClientID}`) #{vehicule.Proprietaire}
-              .col-md-2
-                .btn-group.btn-group-sm
-                  a.btn.btn-primary(href=`/vehicules/${vehicule.VehiculeID}`) Détails
-                  a.btn.btn-warning(href=`/interventions/planifier?vehiculeId=${vehicule.VehiculeID}`) Intervention
-      else
-        .list-group-item.text-center.py-4
-          p.text-muted.mb-0 Aucun véhicule enregistré
+          .py-4.px-4.transition.hover-bg-muted
+            .grid.grid-cols-1.grid-md-5.gap-4.items-center
+              .flex.flex-col
+                h5.font-medium.text-lg.mb-0 #{vehicule.Marque} #{vehicule.Modele}
+              
+              div
+                span.badge.badge-outline.px-3.py-1 #{vehicule.Immatriculation}
+              
+              div
+                span #{vehicule.Annee || 'Non renseignée'}
+              
+              div
+                a.text-primary.hover-underline(href=`/clients/${vehicule.ClientID}`) #{vehicule.Proprietaire}
+              
+              .flex.items-center.justify-end.gap-2.order-first-mobile
+                a.btn.btn-primary.btn-sm(href=`/vehicules/${vehicule.VehiculeID}`)
+                  i(data-lucide="eye", class="h-4 w-4 mr-1")
+                  span.hidden.desktop-inline Détails
+                a.btn.btn-accent.btn-sm(href=`/interventions/planifier?vehiculeId=${vehicule.VehiculeID}&clientId=${vehicule.ClientID}`)
+  i(data-lucide="calendar-plus", class="h-4 w-4 mr-1")
+  span.hidden.desktop-inline Intervention
+    else
+      .p-8.text-center
+        i(data-lucide="car", class="h-10 w-10 mx-auto mb-3 text-muted-foreground")
+        p.text-muted-foreground Aucun véhicule enregistré

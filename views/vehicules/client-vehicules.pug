@@ -1,45 +1,48 @@
-extends ../layout
+extends ../layout/layout
 
 block content
-  .card.mb-4
-    .card-header.bg-primary.text-white
-      .d-flex.justify-content-between.align-items-center
-        h3.mb-0
-          i.bi.bi-person-fill.me-2
-          | Véhicules de #{client.Prenom} #{client.Nom}
-        .btn-group
-          a.btn.btn-light.btn-sm(href=`/clients/${client.ClientID}`)
-            i.bi.bi-person-fill.me-1
-            | Fiche client
-          a.btn.btn-light.btn-sm(href='/clients')
-            i.bi.bi-arrow-left.me-1
-            | Retour aux clients
+  .card.mb-6
+    .card-header.bg-primary.text-primary-foreground
+      .flex.justify-between.items-center
+        .flex.items-center
+          i(data-lucide="user", class="h-5 w-5 mr-2")
+          h3.font-semibold.text-lg Véhicules de #{client.Prenom} #{client.Nom}
+        .flex.gap-2
+          a.btn.btn-ghost.text-primary-foreground.btn-sm(href=`/clients/${client.ClientID}`)
+            i(data-lucide="user", class="h-4 w-4 mr-1")
+            span Fiche client
+          a.btn.btn-ghost.text-primary-foreground.btn-sm(href='/clients')
+            i(data-lucide="arrow-left", class="h-4 w-4 mr-1")
+            span Retour aux clients
   
-  .mb-3
-    a.btn.btn-success(href=`/vehicules/ajouter?clientId=${client.ClientID}`)
-      i.bi.bi-plus-circle-fill.me-2
-      | Ajouter un véhicule
+  .flex.items-center.mb-4
+    a.btn.btn-secondary(href=`/vehicules/ajouter?clientId=${client.ClientID}`)
+      i(data-lucide="plus-circle", class="h-4 w-4 mr-2")
+      span Ajouter un véhicule
   
-  .row
+  .grid.grid-cols-1.grid-md-2.gap-4
     if vehicules && vehicules.length > 0
       each vehicule in vehicules
-        .col-md-6.mb-3
-          .card
-            .card-header.bg-success.text-white
-              h5.mb-0 #{vehicule.Marque} #{vehicule.Modele}
-            .card-body
-              p
-                strong Immatriculation: 
-                | #{vehicule.Immatriculation}
-              p
-                strong Année: 
-                | #{vehicule.Annee || 'Non renseignée'}
-              .btn-group
-                a.btn.btn-primary(href=`/vehicules/${vehicule.VehiculeID}`) Détails
-                a.btn.btn-warning(href=`/interventions/planifier?vehiculeId=${vehicule.VehiculeID}`) Planifier intervention
-            .card-footer
-              small.text-muted ID: #{vehicule.VehiculeID}
+        .card.transition.hover.shadow-md
+          .card-header.bg-secondary.text-secondary-foreground
+            h5.font-medium.mb-0 #{vehicule.Marque} #{vehicule.Modele}
+          .card-body
+            p.mb-2
+              span.font-medium Immatriculation: 
+              span.badge.badge-outline.px-2.py-1 #{vehicule.Immatriculation}
+            p.mb-4
+              span.font-medium Année: 
+              span #{vehicule.Annee || 'Non renseignée'}
+            .flex.gap-2
+              a.btn.btn-primary.btn-sm(href=`/vehicules/${vehicule.VehiculeID}`) 
+                i(data-lucide="info", class="h-4 w-4 mr-1")
+                span Détails
+              a.btn.btn-accent.btn-sm(href=`/interventions/planifier?vehiculeId=${vehicule.VehiculeID}`)
+                i(data-lucide="calendar-plus", class="h-4 w-4 mr-1")
+                span Intervention
+          .card-footer.text-sm.text-muted-foreground ID: #{vehicule.VehiculeID}
     else
       .col-12
-        .alert.alert-info
+        .alert.alert-info.flex.items-center
+          i(data-lucide="info", class="h-5 w-5 mr-2")
           p.mb-0 Ce client n'a pas encore de véhicule.
