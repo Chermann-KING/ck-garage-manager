@@ -29,7 +29,7 @@ class ClientsController {
   // Afficher le détail d'un client
   async showClient(req, res) {
     try {
-      const clientId = parseInt(req.params.id);
+      const clientId = req.params.id;
       const client = await clientsService.getClientById(clientId);
 
       if (!client) {
@@ -40,8 +40,9 @@ class ClientsController {
       }
 
       res.render("clients/details", {
-        title: `${client.Prenom} ${client.Nom}`,
+        title: `${client.prenom} ${client.nom}`,
         client,
+        vehicules: client.vehicules,
       });
     } catch (error) {
       console.error("Erreur dans showClient:", error);
@@ -63,23 +64,15 @@ class ClientsController {
 
   // Traiter l'ajout d'un client
   async addClient(req, res) {
-    const { nom, prenom, telephone, email } = req.body;
     try {
-      const clientData = {
-        nom,
-        prenom,
-        telephone,
-        email,
-      };
-
-      const clientId = await clientsService.addClient(clientData);
+      const newClient = await clientsService.createClient(req.body);
 
       req.session.flashMessage = {
         type: "success",
         text: "Client ajouté avec succès",
       };
 
-      res.redirect(`/clients/${clientId}`);
+      res.redirect(`/clients/${newClient.clientid}`);
     } catch (error) {
       console.error("Erreur dans addClient:", error);
       res.render("clients/form", {
@@ -94,7 +87,7 @@ class ClientsController {
   // Afficher le formulaire de modification d'un client
   async showEditClientForm(req, res) {
     try {
-      const clientId = parseInt(req.params.id);
+      const clientId = req.params.id;
       const client = await clientsService.getClientById(clientId);
 
       if (!client) {
@@ -105,7 +98,7 @@ class ClientsController {
       }
 
       res.render("clients/form", {
-        title: `Modifier ${client.Prenom} ${client.Nom}`,
+        title: `Modifier ${client.prenom} ${client.nom}`,
         client,
         isNew: false,
       });
@@ -120,35 +113,27 @@ class ClientsController {
 
   // Traiter la modification d'un client
   async updateClient(req, res) {
-    const { nom, prenom, telephone, email } = req.body;
     try {
-      const clientId = parseInt(req.params.id);
-      const clientData = {
-        nom,
-        prenom,
-        telephone,
-        email,
-      };
-
-      await clientsService.updateClient(clientId, clientData);
+      const clientId = req.params.id;
+      const updatedClient = await clientsService.updateClient(
+        clientId,
+        req.body
+      );
 
       req.session.flashMessage = {
         type: "success",
         text: "Client modifié avec succès",
       };
 
-      res.redirect(`/clients/${clientId}`);
+      res.redirect(`/clients/${updatedClient.clientid}`);
     } catch (error) {
       console.error("Erreur dans updateClient:", error);
-
-      const client = {
-        ClientID: req.params.id,
-        ...req.body,
-      };
-
       res.render("clients/form", {
         title: "Modifier un client",
-        client,
+        client: {
+          clientid: req.params.id,
+          ...req.body,
+        },
         isNew: false,
         error: "Une erreur est survenue lors de la modification du client",
       });

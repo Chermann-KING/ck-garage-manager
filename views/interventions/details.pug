@@ -6,10 +6,10 @@ block content
       .flex.justify-between.items-center
         .flex.items-center
           i(data-lucide="wrench", class="h-5 w-5 mr-2")
-          h3.font-semibold.text-lg Intervention ##{intervention.InterventionID}
+          h3.font-semibold.text-lg Intervention ##{intervention.interventionid}
         .flex.gap-2
-          if intervention.Statut !== 'Terminé' && intervention.Statut !== 'Annulé'
-            a.btn.btn-ghost.text-accent-foreground(href=`/interventions/${intervention.InterventionID}/statut`)
+          if intervention.statut !== 'Terminé' && intervention.statut !== 'Annulé'
+            a.btn.btn-ghost.text-accent-foreground(href=`/interventions/${intervention.interventionid}/statut`)
               i(data-lucide="pencil", class="h-4 w-4 mr-1")
               span Modifier statut
           a.btn.btn-ghost.text-accent-foreground(href='/interventions')
@@ -25,23 +25,23 @@ block content
               i(data-lucide="calendar", class="h-4 w-4 mr-2 mt-1 text-muted-foreground")
               div
                 p.font-medium.mb-1 Date
-                p.text-lg #{new Date(intervention.Date_Intervention).toLocaleDateString('fr-FR')}
+                p.text-lg #{new Date(intervention.date_intervention).toLocaleDateString('fr-FR')}
             .flex.items-start.mb-2
-              i(data-lucide="tool", class="h-4 w-4 mr-2 mt-1 text-muted-foreground")
+              i(data-lucide="wrench", class="h-4 w-4 mr-2 mt-1 text-muted-foreground")
               div
                 p.font-medium.mb-1 Type
-                p.text-lg #{intervention.TypeIntervention}
+                p.text-lg #{intervention.type_intervention}
             .flex.items-start.mb-2
               i(data-lucide="activity", class="h-4 w-4 mr-2 mt-1 text-muted-foreground")
               div
                 p.font-medium.mb-1 Statut
                 p
-                  span.badge.px-3.py-1(class=`${intervention.Statut === 'Terminé' ? 'badge-secondary' : intervention.Statut === 'En cours' ? 'badge-primary' : intervention.Statut === 'Planifié' ? 'badge-Planifié' : 'badge-outline'}`) #{intervention.Statut}
+                  span.badge.px-3.py-1(class=`${intervention.statut === 'Terminé' ? 'badge-secondary' : intervention.statut === 'En cours' ? 'badge-primary' : intervention.statut === 'Planifié' ? 'badge-Planifié' : 'badge-outline'}`) #{intervention.statut}
             .flex.items-start
               i(data-lucide="credit-card", class="h-4 w-4 mr-2 mt-1 text-muted-foreground")
               div
                 p.font-medium.mb-1 Prix
-                p.text-lg.font-medium #{intervention.Prix.toFixed(2)} €
+                p.text-lg.font-medium #{intervention.prix.toFixed(2)} €
         
         .card.card-secondary
           .card-body
@@ -51,19 +51,19 @@ block content
               div
                 p.font-medium.mb-1 Marque / Modèle
                 p.text-lg
-                  a.text-secondary.link-hover(href=`/vehicules/${intervention.VehiculeID}`) #{intervention.Marque} #{intervention.Modele}
+                  a.text-secondary.link-hover(href=`/vehicules/${intervention.vehiculeid}`) #{intervention.marque} #{intervention.modele}
             .flex.items-start.mb-2
               i(data-lucide="tag", class="h-4 w-4 mr-2 mt-1 text-muted-foreground")
               div
                 p.font-medium.mb-1 Immatriculation
                 p
-                  span.badge.badge-outline.px-3.py-1 #{intervention.Immatriculation}
+                  span.badge.badge-outline.px-3.py-1 #{intervention.immatriculation}
             .flex.items-start
               i(data-lucide="user", class="h-4 w-4 mr-2 mt-1 text-muted-foreground")
               div
                 p.font-medium.mb-1 Propriétaire
                 p.text-lg
-                  a.text-primary.link-hover(href=`/clients/${intervention.ClientID}`) #{intervention.Proprietaire}
+                  a.text-primary.link-hover(href=`/clients/${intervention.vehicules.clientid}`) #{intervention.proprietaire}
       
       .card.bg-muted-light.mb-4
         .card-body
@@ -71,17 +71,17 @@ block content
             i(data-lucide="file-text", class="h-5 w-5 mr-2 mt-1 text-muted-foreground")
             div
               h5.font-semibold.mb-2 Description
-              if intervention.Description
-                p.mb-0 #{intervention.Description}
+              if intervention.description
+                p.mb-0 #{intervention.description}
               else
                 p.text-muted-foreground.mb-0 Aucune description fournie.
       
       .flex.justify-between.mt-6
-        a.btn.btn-secondary(href=`/vehicules/${intervention.VehiculeID}`)
+        a.btn.btn-secondary(href=`/vehicules/${intervention.vehiculeid}`)
           i(data-lucide="car", class="h-4 w-4 mr-2")
           span Voir le véhicule
         
-        if intervention.Statut !== 'Terminé' && intervention.Statut !== 'Annulé'
-          a.btn.btn-accent(href=`/interventions/${intervention.InterventionID}/statut`)
+        if intervention.statut !== 'Terminé' && intervention.statut !== 'Annulé'
+          a.btn.btn-accent(href=`/interventions/${intervention.interventionid}/statut`)
             i(data-lucide="refresh-cw", class="h-4 w-4 mr-2")
             span Mettre à jour le statut

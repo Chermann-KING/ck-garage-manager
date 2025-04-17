@@ -2,22 +2,21 @@ const vehiculesService = require("../services/vehicules.service");
 const clientsService = require("../services/clients.service");
 
 class VehiculesController {
-  // Afficher tous les véhicules avec tri par type si demandé
+  // Afficher la liste des véhicules
   async listVehicules(req, res) {
     try {
-      let vehicules;
+      const sortByType = req.query.sort === "type";
+      const vehicules = await vehiculesService.getAllVehicules();
 
-      // Si le paramètre de tri est présent et égal à 'type'
-      if (req.query.sort === "type") {
-        vehicules = await vehiculesService.getVehiculesSortedByType();
-      } else {
-        vehicules = await vehiculesService.getAllVehicules();
+      // Trier les véhicules si nécessaire
+      if (sortByType) {
+        vehicules.sort((a, b) => a.marque.localeCompare(b.marque));
       }
 
       res.render("vehicules/list", {
         title: "Liste des véhicules",
         vehicules,
-        sortByType: req.query.sort === "type",
+        sortByType,
       });
     } catch (error) {
       console.error("Erreur dans listVehicules:", error);
@@ -29,45 +28,30 @@ class VehiculesController {
     }
   }
 
-  // Afficher les véhicules d'un client spécifique
-  async listVehiculesByClient(req, res) {
+  // Afficher les véhicules d'un client
+  async listVehiculesClient(req, res) {
     try {
-      const clientId = parseInt(req.params.clientId);
-
-      // Récupérer les infos du client
-      const client = await clientsService.getClientById(clientId);
-
-      if (!client) {
-        return res.status(404).render("error", {
-          title: "Client non trouvé",
-          message: "Le client demandé n'existe pas",
-        });
-      }
-
-      // Récupérer les véhicules du client
+      const clientId = req.params.clientId;
       const vehicules = await vehiculesService.getVehiculesByClientId(clientId);
-
-      res.render("vehicules/client-vehicules", {
-        title: `Véhicules de ${client.Prenom} ${client.Nom}`,
-        client,
+      res.render("vehicules/list", {
+        title: "Véhicules du client",
         vehicules,
+        clientId,
       });
     } catch (error) {
-      console.error("Erreur dans listVehiculesByClient:", error);
+      console.error("Erreur dans listVehiculesClient:", error);
       res.status(500).render("error", {
         title: "Erreur",
         message:
-          "Une erreur est survenue lors de la récupération des véhicules",
+          "Une erreur est survenue lors de la récupération des véhicules du client",
       });
     }
   }
 
-  // Afficher le détail d'un véhicule avec son historique d'interventions
+  // Afficher le détail d'un véhicule
   async showVehicule(req, res) {
     try {
-      const vehiculeId = parseInt(req.params.id);
-
-      // Récupérer les infos du véhicule
+      const vehiculeId = req.params.id;
       const vehicule = await vehiculesService.getVehiculeById(vehiculeId);
 
       if (!vehicule) {
@@ -77,14 +61,9 @@ class VehiculesController {
         });
       }
 
-      // Récupérer l'historique des interventions
-      const interventions =
-        await vehiculesService.getVehiculeInterventionsHistory(vehiculeId);
-
       res.render("vehicules/details", {
-        title: `${vehicule.Marque} ${vehicule.Modele} - ${vehicule.Immatriculation}`,
+        title: `${vehicule.marque} ${vehicule.modele}`,
         vehicule,
-        interventions,
       });
     } catch (error) {
       console.error("Erreur dans showVehicule:", error);
@@ -98,21 +77,33 @@ class VehiculesController {
   // Afficher le formulaire d'ajout de véhicule
   async showAddVehiculeForm(req, res) {
     try {
-      // Si un ID client est fourni, on le récupère pour pré-sélectionner
-      let client = null;
-      if (req.query.clientId) {
-        const clientId = parseInt(req.query.clientId);
-        client = await clientsService.getClientById(clientId);
+      console.log("Paramètres reçus:", req.params);
+      const clientId = req.params.clientId;
+
+      if (!clientId) {
+        return res.status(400).render("error", {
+          title: "Erreur",
+          message: "L'ID du client est requis",
+        });
       }
 
-      // Récupérer tous les clients pour le menu déroulant
       const clients = await clientsService.getAllClients();
+      const selectedClient = await clientsService.getClientById(clientId);
+
+      if (!selectedClient) {
+        return res.status(404).render("error", {
+          title: "Client non trouvé",
+          message: "Le client spécifié n'existe pas",
+        });
+      }
+
+      console.log("Client sélectionné:", selectedClient);
 
       res.render("vehicules/form", {
         title: "Ajouter un véhicule",
-        vehicule: { ClientID: client ? client.ClientID : "" },
+        vehicule: { clientid: clientId },
         clients,
-        selectedClient: client,
+        selectedClient,
         isNew: true,
       });
     } catch (error) {
@@ -127,53 +118,86 @@ class VehiculesController {
   // Traiter l'ajout d'un véhicule
   async addVehicule(req, res) {
     try {
+      console.log("Données reçues:", req.body);
+      console.log("Paramètres:", req.params);
+
+      const clientId = req.params.clientId;
       const vehiculeData = {
-        clientId: parseInt(req.body.clientId),
-        immatriculation: req.body.immatriculation,
-        marque: req.body.marque,
-        modele: req.body.modele,
-        annee: parseInt(req.body.annee),
+        ...req.body,
+        clientid: clientId,
       };
 
-      const vehiculeId = await vehiculesService.addVehicule(vehiculeData);
+      const newVehicule = await vehiculesService.createVehicule(vehiculeData);
 
-      req.session.flashMessage = {
-        type: "success",
-        text: "Véhicule ajouté avec succès",
-      };
-
-      // Rediriger vers la page du véhicule ou vers la liste des véhicules du client
       if (req.body.returnToClient) {
-        res.redirect(`/clients/${vehiculeData.clientId}`);
+        res.redirect(`/clients/${clientId}`);
       } else {
-        res.redirect(`/vehicules/${vehiculeId}`);
+        res.redirect(`/vehicules/${newVehicule.id}`);
       }
     } catch (error) {
       console.error("Erreur dans addVehicule:", error);
+      res.render("vehicules/form", {
+        title: "Ajouter un véhicule",
+        vehicule: { ...req.body, clientid: req.params.clientId },
+        isNew: true,
+        error: "Une erreur est survenue lors de l'ajout du véhicule",
+      });
+    }
+  }
 
-      try {
-        // Récupérer à nouveau la liste des clients pour le formulaire
-        const clients = await clientsService.getAllClients();
+  // Afficher le formulaire de modification d'un véhicule
+  async showEditVehiculeForm(req, res) {
+    try {
+      const vehiculeId = req.params.id;
+      const vehicule = await vehiculesService.getVehiculeById(vehiculeId);
 
-        res.render("vehicules/form", {
-          title: "Ajouter un véhicule",
-          vehicule: {
-            ClientID: req.body.clientId,
-            Immatriculation: req.body.immatriculation,
-            Marque: req.body.marque,
-            Modele: req.body.modele,
-            Annee: req.body.annee,
-          },
-          clients,
-          isNew: true,
-          error: "Une erreur est survenue lors de l'ajout du véhicule",
-        });
-      } catch (err) {
-        res.status(500).render("error", {
-          title: "Erreur",
-          message: "Une erreur est survenue lors de l'ajout du véhicule",
+      if (!vehicule) {
+        return res.status(404).render("error", {
+          title: "Véhicule non trouvé",
+          message: "Le véhicule demandé n'existe pas",
         });
       }
+
+      res.render("vehicules/form", {
+        title: `Modifier ${vehicule.marque} ${vehicule.modele}`,
+        vehicule,
+        isNew: false,
+      });
+    } catch (error) {
+      console.error("Erreur dans showEditVehiculeForm:", error);
+      res.status(500).render("error", {
+        title: "Erreur",
+        message: "Une erreur est survenue lors de la récupération du véhicule",
+      });
+    }
+  }
+
+  // Traiter la modification d'un véhicule
+  async updateVehicule(req, res) {
+    try {
+      const vehiculeId = req.params.id;
+      const updatedVehicule = await vehiculesService.updateVehicule(
+        vehiculeId,
+        req.body
+      );
+
+      req.session.flashMessage = {
+        type: "success",
+        text: "Véhicule modifié avec succès",
+      };
+
+      res.redirect(`/vehicules/${updatedVehicule.id}`);
+    } catch (error) {
+      console.error("Erreur dans updateVehicule:", error);
+      res.render("vehicules/form", {
+        title: "Modifier un véhicule",
+        vehicule: {
+          id: req.params.id,
+          ...req.body,
+        },
+        isNew: false,
+        error: "Une erreur est survenue lors de la modification du véhicule",
+      });
     }
   }
 }

@@ -2,28 +2,25 @@ const express = require("express");
 const router = express.Router();
 const vehiculesController = require("../controllers/vehicules.controller");
 
-// Liste de tous les véhicules
-router.get("/", vehiculesController.listVehicules.bind(vehiculesController));
+// Liste des véhicules
+router.get("/", vehiculesController.listVehicules);
 
 // Liste des véhicules d'un client
-router.get(
-  "/client/:clientId",
-  vehiculesController.listVehiculesByClient.bind(vehiculesController)
-);
+router.get("/client/:clientId", vehiculesController.listVehiculesClient);
 
 // Formulaire d'ajout d'un véhicule
-router.get(
-  "/ajouter",
-  vehiculesController.showAddVehiculeForm.bind(vehiculesController)
-);
+router.get("/ajouter/:clientId", vehiculesController.showAddVehiculeForm);
 
 // Traitement de l'ajout d'un véhicule
-router.post(
-  "/ajouter",
-  vehiculesController.addVehicule.bind(vehiculesController)
-);
+router.post("/ajouter/:clientId", vehiculesController.addVehicule);
 
-// Détail d'un véhicule
-router.get("/:id", vehiculesController.showVehicule.bind(vehiculesController));
+// Détails d'un véhicule
+router.get("/:id", vehiculesController.showVehicule);
+
+// Formulaire de modification d'un véhicule
+router.get("/:id/modifier", vehiculesController.showEditVehiculeForm);
+
+// Traitement de la modification d'un véhicule
+router.post("/:id/modifier", vehiculesController.updateVehicule);
 
 module.exports = router;

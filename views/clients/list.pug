@@ -27,37 +27,37 @@ block content
             .grid.grid-cols-1.grid-md-4.gap-4.items-center
               <!--Nom du client-->
               .flex.flex-col
-                h5.font-medium.text-lg.mb-0 #{client.Nom} #{client.Prenom}
+                h5.font-medium.text-lg.mb-0 #{client.nom} #{client.prenom}
 
               <!--Contact du client-->
               .flex.flex-col.space-y-1
-                if client.Telephone
+                if client.telephone
                   .flex.items-center
                     i(data-lucide="phone", class="h-4 w-4 mr-2 text-muted-foreground")
-                    span #{client.Telephone}
-                if client.Email
+                    span #{client.telephone}
+                if client.email
                   .flex.items-center
                     i(data-lucide="mail", class="h-4 w-4 mr-2 text-muted-foreground")
-                    span.truncate #{client.Email}
+                    span.truncate #{client.email}
 
               <!--Badge nombre de véhicule du client-->
               div
-                .badge.badge-primary.px-3.py-2 #{client.NombreVehicules} #{client.NombreVehicules > 1 ? 'véhicules' : 'véhicule'}
+                .badge.badge-primary.px-3.py-2 #{client.nombre_vehicules} #{client.nombre_vehicules > 1 ? 'véhicules' : 'véhicule'}
 
               <!--Actions-->
               .flex.items-center.justify-end.gap-2.order-first-mobile
                 <!--Action Détails d'un véhicule-->
-                a.btn.btn-primary.btn-sm(href=`/clients/${client.ClientID}`)
+                a.btn.btn-primary.btn-sm(href=`/clients/${client.clientid}`)
                   i(data-lucide="info", class="h-4 w-4 mr-1")
                   span.hidden.desktop-inline Détails
                 
                 <!--Action Ajouter un véhicule-->
-                a.btn.btn-secondary.btn-sm(href=`/vehicules/ajouter?clientId=${client.ClientID}`)
+                a.btn.btn-secondary.btn-sm(href=`/vehicules/ajouter/${client.clientid}`)
                   i(data-lucide="plus-circle", class="h-4 w-4 mr-1")
                   span.hidden.desktop-inline Véhicule
                 
                 <!--Action Modifier un client-->
-                a.btn.btn-outline.btn-sm(href=`/clients/${client.ClientID}/modifier`)
+                a.btn.btn-outline.btn-sm(href=`/clients/${client.clientid}/modifier`)
                   i(data-lucide="pencil", class="h-4 w-4")
                   span.hidden.desktop-inline Modifier
     else

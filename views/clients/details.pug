@@ -3,67 +3,71 @@ extends ../layout/layout
 block content
   .card.mb-6
     .card-header.bg-primary.text-primary-foreground
-      .flex.justify-between.items-center
+      .flex.items-center.justify-between
         .flex.items-center
           i(data-lucide="user", class="h-5 w-5 mr-2")
-          h3.font-semibold.text-lg #{client.Prenom} #{client.Nom}
-        .flex.gap-2
-          a.btn.btn-ghost.text-primary-foreground(href=`/clients/${client.ClientID}/modifier`)
-            i(data-lucide="pencil", class="h-4 w-4 mr-1")
-            span Modifier
-          a.btn.btn-ghost.text-primary-foreground(href='/clients')
-            i(data-lucide="arrow-left", class="h-4 w-4 mr-1")
+          h3.font-semibold.text-lg #{client.prenom} #{client.nom}
+        .flex.items-center.gap-2
+          a.btn.btn-outline-light(href="/clients")
+            i(data-lucide="chevron-left", class="h-4 w-4 mr-2")
             span Retour à la liste
+          a.btn.btn-outline-light(href=`/clients/${client.clientid}/modifier`)
+            i(data-lucide="pencil", class="h-4 w-4 mr-2")
+            span Modifier
     
     .card-body
       .grid.grid-cols-1.grid-md-2.gap-4
-        .flex.items-center
-          i(data-lucide="phone", class="h-5 w-5 mr-2 text-muted-foreground")
-          p.font-medium Téléphone: 
-            if client.Telephone
-              span #{client.Telephone}
-            else
-              span.text-muted-foreground Non renseigné
-        .flex.items-center
-          i(data-lucide="mail", class="h-5 w-5 mr-2 text-muted-foreground")
-          p.font-medium Email: 
-            if client.Email
-              span #{client.Email}
-            else
-              span.text-muted-foreground Non renseigné
+        if client.telephone
+          .flex.items-center
+            i(data-lucide="phone", class="h-4 w-4 mr-2 text-muted-foreground")
+            span #{client.telephone}
+        if client.email
+          .flex.items-center
+            i(data-lucide="mail", class="h-4 w-4 mr-2 text-muted-foreground")
+            span.truncate #{client.email}
   
-  .flex.items-center.mb-4
-    i(data-lucide="car", class="h-5 w-5 mr-2 text-secondary")
-    h3.text-xl.font-semibold Véhicules
-    a.btn.btn-secondary.ml-3(href=`/vehicules/ajouter?clientId=${client.ClientID}`)
-      i(data-lucide="plus-circle", class="h-4 w-4 mr-1")
+  .flex.justify-between.items-center.mb-6
+    h4.text-xl.font-medium Véhicules
+    a.btn.btn-primary(href=`/vehicules/ajouter/${client.clientid}`)
+      i(data-lucide="plus-circle", class="h-4 w-4 mr-2")
       span Ajouter un véhicule
   
-  if client.vehicules && client.vehicules.length > 0
-    .grid.grid-cols-1.grid-md-2.gap-4
-      each vehicule in client.vehicules
-        .card.transition.hover.shadow-md
-          .card-header.bg-secondary.text-secondary-foreground
-            h5.font-medium #{vehicule.Marque} #{vehicule.Modele}
+  if vehicules && vehicules.length > 0
+    .grid.grid-cols-1.grid-md-2.grid-lg-3.gap-4
+      each vehicule in vehicules
+        .card
+          .card-header.bg-muted-light
+            .flex.justify-between.items-center
+              h5.font-medium.mb-0 #{vehicule.marque} #{vehicule.modele}
+              span.badge.badge-outline #{vehicule.immatriculation}
+          
           .card-body
-            p.mb-2
-              span.font-medium Immatriculation: 
-              span.badge.badge-outline #{vehicule.Immatriculation}
-            p.mb-4
-              span.font-medium Année: 
-              span #{vehicule.Annee || 'Non renseignée'}
-            .flex.gap-2
-              a.btn.btn-primary.btn-sm(href=`/vehicules/${vehicule.VehiculeID}`) 
-                i(data-lucide="info", class="h-4 w-4 mr-1")
-                span Détails
-              a.btn.btn-accent.btn-sm(href=`/interventions/planifier?vehiculeId=${vehicule.VehiculeID}`)
-                i(data-lucide="calendar-plus", class="h-4 w-4 mr-1")
-                span Intervention
-          .card-footer.text-sm.text-muted-foreground ID: #{vehicule.VehiculeID}
+            .space-y-2
+              if vehicule.annee
+                .flex.items-center
+                  i(data-lucide="calendar", class="h-4 w-4 mr-2 text-muted-foreground")
+                  span #{vehicule.annee}
+              
+              .flex.items-center.gap-2
+                i(data-lucide="wrench", class="h-4 w-4 text-muted-foreground")
+                if vehicule.interventions_en_cours > 0
+                  span.badge.badge-warning #{vehicule.interventions_en_cours} en cours
+                else if vehicule.interventions_terminees > 0
+                  span.badge.badge-success #{vehicule.interventions_terminees} terminées
+                else
+                  span.text-muted-foreground Aucune intervention
+          
+          .card-footer.flex.justify-end.gap-2
+            a.btn.btn-outline-primary.btn-sm(href=`/vehicules/${vehicule.vehiculeid}`)
+              i(data-lucide="eye", class="h-4 w-4 mr-1")
+              span Détails
+            a.btn.btn-outline-accent.btn-sm(href=`/interventions/planifier?vehiculeId=${vehicule.vehiculeid}`)
+              i(data-lucide="calendar-plus", class="h-4 w-4 mr-1")
+              span Intervention
   else
     .alert.alert-info.flex.items-center
       i(data-lucide="info", class="h-5 w-5 mr-2")
-      p.mb-0 Ce client n'a pas encore de véhicule.
+      span Aucun véhicule enregistré pour ce client
   
   if client.interventions && client.interventions.length > 0
     .mt-8.mb-4.flex.items-center
@@ -83,14 +87,14 @@ block content
         tbody
           each intervention in client.interventions
             tr
-              td #{new Date(intervention.Date_Intervention).toLocaleDateString('fr-FR')}
-              td.whitespace-nowrap #{intervention.Marque} #{intervention.Modele}
-                .text-sm.text-muted-foreground #{intervention.Immatriculation}
-              td #{intervention.TypeIntervention}
+              td #{new Date(intervention.date_intervention).toLocaleDateString('fr-FR')}
+              td.whitespace-nowrap #{intervention.marque} #{intervention.modele}
+                .text-sm.text-muted-foreground #{intervention.immatriculation}
+              td #{intervention.type_intervention}
               td 
-                span.badge(class=`${intervention.Statut === 'Terminé' ? 'badge-secondary' : intervention.Statut === 'En cours' ? 'badge-primary' : intervention.Statut === 'Planifié' ? 'badge-Planifié' : 'badge-outline'}`) #{intervention.Statut}
-              td.text-right #{intervention.Prix.toFixed(2)} €
+                span.badge(class=`${intervention.statut === 'Terminé' ? 'badge-secondary' : intervention.statut === 'En cours' ? 'badge-primary' : intervention.statut === 'Planifié' ? 'badge-Planifié' : 'badge-outline'}`) #{intervention.statut}
+              td.text-right #{intervention.prix.toFixed(2)} €
               td
-                a.btn.btn-primary.btn-sm(href=`/interventions/${intervention.InterventionID}`)
+                a.btn.btn-primary.btn-sm(href=`/interventions/${intervention.interventionid}`)
                   i(data-lucide="eye", class="h-4 w-4")
                   span.sr-only Détails

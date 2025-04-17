@@ -1,22 +1,37 @@
-const { connectToDatabase, sql } = require("../config/db");
+const supabase = require("../config/supabase");
 
 class InterventionsService {
   // Récupérer toutes les interventions avec détails
   async getAllInterventions() {
     try {
-      const pool = await connectToDatabase();
-      const result = await pool.request().query(`
-        SELECT i.*, 
-               ti.Nom AS TypeIntervention, 
-               v.Immatriculation, v.Marque, v.Modele,
-               c.Nom + ' ' + c.Prenom AS Proprietaire
-        FROM Interventions i
-        JOIN Types_Interventions ti ON i.TypeID = ti.TypeID
-        JOIN Vehicules v ON i.VehiculeID = v.VehiculeID
-        JOIN Clients c ON v.ClientID = c.ClientID
-        ORDER BY i.Date_Intervention DESC
-      `);
-      return result.recordset;
+      const { data, error } = await supabase
+        .from("interventions")
+        .select(
+          `
+          *,
+          vehicules (
+            *,
+            clients (
+              nom,
+              prenom
+            )
+          ),
+          types_interventions (
+            nom
+          )
+        `
+        )
+        .order("date_intervention", { ascending: false });
+
+      if (error) throw error;
+      return data.map((intervention) => ({
+        ...intervention,
+        marque: intervention.vehicules.marque,
+        modele: intervention.vehicules.modele,
+        immatriculation: intervention.vehicules.immatriculation,
+        proprietaire: `${intervention.vehicules.clients.nom} ${intervention.vehicules.clients.prenom}`,
+        type_intervention: intervention.types_interventions.nom,
+      }));
     } catch (error) {
       console.error("Erreur lors de la récupération des interventions:", error);
       throw error;
@@ -24,30 +39,41 @@ class InterventionsService {
   }
 
   // Récupérer une intervention par son ID
-  async getInterventionById(interventionId) {
+  async getInterventionById(id) {
     try {
-      const pool = await connectToDatabase();
-      const result = await pool
-        .request()
-        .input("interventionId", sql.Int, interventionId).query(`
-          SELECT i.*, 
-                 ti.Nom AS TypeIntervention, ti.Prix_base,
-                 v.VehiculeID, v.Immatriculation, v.Marque, v.Modele,
-                 c.ClientID, c.Nom + ' ' + c.Prenom AS Proprietaire
-          FROM Interventions i
-          JOIN Types_Interventions ti ON i.TypeID = ti.TypeID
-          JOIN Vehicules v ON i.VehiculeID = v.VehiculeID
-          JOIN Clients c ON v.ClientID = c.ClientID
-          WHERE i.InterventionID = @interventionId
-        `);
+      const { data, error } = await supabase
+        .from("interventions")
+        .select(
+          `
+          *,
+          vehicules (
+            *,
+            clients (
+              *
+            )
+          ),
+          types_interventions (
+            *
+          )
+        `
+        )
+        .eq("interventionid", id)
+        .single();
 
-      if (result.recordset.length === 0) {
-        return null;
-      }
-
-      return result.recordset[0];
+      if (error) throw error;
+      return {
+        ...data,
+        marque: data.vehicules.marque,
+        modele: data.vehicules.modele,
+        immatriculation: data.vehicules.immatriculation,
+        proprietaire: `${data.vehicules.clients.nom} ${data.vehicules.clients.prenom}`,
+        type_intervention: data.types_interventions.nom,
+      };
     } catch (error) {
-      console.error("Erreur lors de la récupération de l'intervention:", error);
+      console.error(
+        `Erreur lors de la récupération de l'intervention ${id}:`,
+        error
+      );
       throw error;
     }
   }
@@ -55,17 +81,33 @@ class InterventionsService {
   // Récupérer tous les types d'interventions
   async getAllInterventionTypes() {
     try {
-      const pool = await connectToDatabase();
-      const result = await pool.request().query(`
-        SELECT * FROM Types_Interventions
-        ORDER BY Nom
-      `);
-      return result.recordset;
-    } catch (error) {
-      console.error(
-        "Erreur lors de la récupération des types d'interventions:",
-        error
+      console.log(
+        "[InterventionsService] Récupération des types d'interventions"
       );
+      const { data, error } = await supabase
+        .from("types_interventions")
+        .select("*");
+
+      if (error) {
+        console.error(
+          "[InterventionsService] Erreur lors de la récupération des types d'interventions:",
+          error
+        );
+        throw error;
+      }
+
+      console.log(
+        "[InterventionsService] Types d'interventions récupérés:",
+        data
+      );
+      return data.map((type) => ({
+        typeid: type.typeid,
+        nom: type.nom,
+        description: type.description,
+        prix_base: type.prix_base,
+      }));
+    } catch (error) {
+      console.error("[InterventionsService] Erreur détaillée:", error);
       throw error;
     }
   }
@@ -73,18 +115,14 @@ class InterventionsService {
   // Récupérer un type d'intervention par son ID
   async getInterventionTypeById(typeId) {
     try {
-      const pool = await connectToDatabase();
-      const result = await pool.request().input("typeId", sql.Int, typeId)
-        .query(`
-          SELECT * FROM Types_Interventions
-          WHERE TypeID = @typeId
-        `);
+      const { data, error } = await supabase
+        .from("types_interventions")
+        .select("*")
+        .eq("typeid", typeId)
+        .single();
 
-      if (result.recordset.length === 0) {
-        return null;
-      }
-
-      return result.recordset[0];
+      if (error) throw error;
+      return data;
     } catch (error) {
       console.error(
         "Erreur lors de la récupération du type d'intervention:",
@@ -97,43 +135,35 @@ class InterventionsService {
   // Planifier une nouvelle intervention
   async planifierIntervention(interventionData) {
     try {
-      // Récupérer le prix de base du type d'intervention
-      const pool = await connectToDatabase();
-      const typeResult = await pool
-        .request()
-        .input("typeId", sql.Int, interventionData.typeId).query(`
-          SELECT Prix_base FROM Types_Interventions
-          WHERE TypeID = @typeId
-        `);
+      console.log("Données reçues:", interventionData);
 
-      if (typeResult.recordset.length === 0) {
-        throw new Error("Type d'intervention non trouvé");
+      const dataToInsert = {
+        vehiculeid: parseInt(interventionData.vehicule_id),
+        typeid: parseInt(interventionData.type_id),
+        date_intervention: interventionData.date_intervention,
+        statut: interventionData.statut,
+        prix: interventionData.prix ? parseFloat(interventionData.prix) : null,
+        description: interventionData.description || null,
+      };
+
+      console.log("Données à insérer:", dataToInsert);
+
+      const { data, error } = await supabase
+        .from("interventions")
+        .insert([dataToInsert])
+        .select()
+        .single();
+
+      if (error) {
+        console.error(
+          "Erreur lors de la planification de l'intervention:",
+          error
+        );
+        throw error;
       }
 
-      // Calculer le prix final (on utilise le prix de base si aucun prix personnalisé n'est spécifié)
-      const prixBase = typeResult.recordset[0].Prix_base;
-      const prixFinal = interventionData.prix || prixBase;
-
-      // Insérer l'intervention
-      const result = await pool
-        .request()
-        .input("vehiculeId", sql.Int, interventionData.vehiculeId)
-        .input("typeId", sql.Int, interventionData.typeId)
-        .input(
-          "dateIntervention",
-          sql.Date,
-          new Date(interventionData.dateIntervention)
-        )
-        .input("statut", sql.NVarChar, interventionData.statut || "Planifié")
-        .input("prix", sql.Decimal, prixFinal)
-        .input("description", sql.NVarChar, interventionData.description || "")
-        .query(`
-          INSERT INTO Interventions (VehiculeID, TypeID, Date_Intervention, Statut, Prix, Description)
-          OUTPUT INSERTED.InterventionID
-          VALUES (@vehiculeId, @typeId, @dateIntervention, @statut, @prix, @description)
-        `);
-
-      return result.recordset[0].InterventionID;
+      console.log("Intervention créée:", data);
+      return data.interventionid;
     } catch (error) {
       console.error(
         "Erreur lors de la planification de l'intervention:",
@@ -144,41 +174,25 @@ class InterventionsService {
   }
 
   // Mettre à jour le statut d'une intervention
-  async updateInterventionStatus(
-    interventionId,
-    newStatus,
-    description = null
-  ) {
+  async updateInterventionStatus(id, status, description = null) {
     try {
-      const pool = await connectToDatabase();
+      const updateData = {
+        statut: status,
+        ...(description && { description: description }),
+      };
 
-      let query = `
-        UPDATE Interventions
-        SET Statut = @statut
-      `;
+      const { data, error } = await supabase
+        .from("interventions")
+        .update(updateData)
+        .eq("interventionid", id)
+        .select()
+        .single();
 
-      // Ajouter la mise à jour de la description si fournie
-      if (description !== null) {
-        query += `, Description = @description`;
-      }
-
-      query += ` WHERE InterventionID = @interventionId`;
-
-      const request = pool
-        .request()
-        .input("interventionId", sql.Int, interventionId)
-        .input("statut", sql.NVarChar, newStatus);
-
-      if (description !== null) {
-        request.input("description", sql.NVarChar, description);
-      }
-
-      await request.query(query);
-
-      return true;
+      if (error) throw error;
+      return data;
     } catch (error) {
       console.error(
-        "Erreur lors de la mise à jour du statut de l'intervention:",
+        `Erreur lors de la mise à jour du statut de l'intervention ${id}:`,
         error
       );
       throw error;
@@ -188,26 +202,74 @@ class InterventionsService {
   // Calculer le prix d'une intervention
   async calculateInterventionPrice(typeId, customPrice = null) {
     try {
-      // Si un prix personnalisé est fourni, on l'utilise
       if (customPrice !== null) {
         return parseFloat(customPrice);
       }
 
-      // Sinon, on utilise le prix de base du type d'intervention
-      const pool = await connectToDatabase();
-      const result = await pool.request().input("typeId", sql.Int, typeId)
-        .query(`
-          SELECT Prix_base FROM Types_Interventions
-          WHERE TypeID = @typeId
-        `);
+      const { data, error } = await supabase
+        .from("types_interventions")
+        .select("prix_base")
+        .eq("typeid", typeId)
+        .single();
 
-      if (result.recordset.length === 0) {
-        throw new Error("Type d'intervention non trouvé");
-      }
-
-      return result.recordset[0].Prix_base;
+      if (error) throw error;
+      return data.prix_base;
     } catch (error) {
       console.error("Erreur lors du calcul du prix de l'intervention:", error);
+      throw error;
+    }
+  }
+
+  async createIntervention(interventionData) {
+    try {
+      const { data, error } = await supabase
+        .from("interventions")
+        .insert([interventionData])
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data;
+    } catch (error) {
+      console.error("Erreur lors de la création de l'intervention:", error);
+      throw error;
+    }
+  }
+
+  async updateIntervention(id, interventionData) {
+    try {
+      const { data, error } = await supabase
+        .from("interventions")
+        .update(interventionData)
+        .eq("interventionid", id)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data;
+    } catch (error) {
+      console.error(
+        `Erreur lors de la mise à jour de l'intervention ${id}:`,
+        error
+      );
+      throw error;
+    }
+  }
+
+  async deleteIntervention(id) {
+    try {
+      const { error } = await supabase
+        .from("interventions")
+        .delete()
+        .eq("interventionid", id);
+
+      if (error) throw error;
+      return true;
+    } catch (error) {
+      console.error(
+        `Erreur lors de la suppression de l'intervention ${id}:`,
+        error
+      );
       throw error;
     }
   }

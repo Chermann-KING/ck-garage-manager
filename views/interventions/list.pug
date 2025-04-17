@@ -26,23 +26,23 @@ block content
           tbody
             each intervention in interventions
               tr
-                td.whitespace-nowrap #{new Date(intervention.Date_Intervention).toLocaleDateString('fr-FR')}
+                td.whitespace-nowrap #{new Date(intervention.date_intervention).toLocaleDateString('fr-FR')}
                 td 
-                  a.text-primary.hover-underline(href=`/vehicules/${intervention.VehiculeID}`) #{intervention.Marque} #{intervention.Modele}
-                  .text-sm.text-muted-foreground #{intervention.Immatriculation}
+                  a.text-primary.hover-underline(href=`/vehicules/${intervention.vehiculeid}`) #{intervention.marque} #{intervention.modele}
+                  .text-sm.text-muted-foreground #{intervention.immatriculation}
                 td 
-                  a.text-primary.hover-underline(href=`/clients/${intervention.ClientID}`) #{intervention.Proprietaire}
-                td #{intervention.TypeIntervention}
+                  a.text-primary.hover-underline(href=`/clients/${intervention.vehicules.clientid}`) #{intervention.proprietaire}
+                td #{intervention.type_intervention}
                 td 
-                  span.badge(class=`badge-${intervention.Statut === 'Terminé' ? 'secondary' : intervention.Statut === 'En cours' ? 'primary' : intervention.Statut === 'Planifié' ? 'badge-Planifié' : intervention.Statut === 'En-attente-de-pièces' ? 'badge-En-attente-de-pièces' : 'badge-outline'}`) #{intervention.Statut}
-                td.text-right.font-medium #{intervention.Prix.toFixed(2)} €
+                  span.badge(class=`${intervention.statut === 'Terminé' ? 'badge-secondary' : intervention.statut === 'En cours' ? 'badge-primary' : intervention.statut === 'Planifié' ? 'badge-Planifié' : intervention.statut === 'En attente de pièces' ? 'badge-En-attente-de-pièces' : 'badge-outline'}`) #{intervention.statut}
+                td.text-right.font-medium #{intervention.prix ? intervention.prix.toFixed(2) + ' €' : '-'}
                 td
                   .flex.gap-1
-                    a.btn.btn-primary.btn-sm(href=`/interventions/${intervention.InterventionID}`)
+                    a.btn.btn-primary.btn-sm(href=`/interventions/${intervention.interventionid}`)
                       i(data-lucide="eye", class="h-4 w-4")
                       span.hidden.desktop-inline Détails
-                    if intervention.Statut !== 'Terminé' && intervention.Statut !== 'Annulé'
-                      a.btn.btn-accent.btn-sm(href=`/interventions/${intervention.InterventionID}/statut`)
+                    if intervention.statut !== 'Terminé' && intervention.statut !== 'Annulé'
+                      a.btn.btn-accent.btn-sm(href=`/interventions/${intervention.interventionid}/statut`)
                         i(data-lucide="refresh-cw", class="h-4 w-4")
                         span.hidden.desktop-inline Statut
   else

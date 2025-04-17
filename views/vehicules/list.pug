@@ -6,43 +6,53 @@ block content
       a.btn.btn-outline-primary(href="/vehicules", class=(sortByType ? "" : "active")) Liste standard
       a.btn.btn-outline-primary(href="/vehicules?sort=type", class=(sortByType ? "active" : "")) Par marque
     
-    a.btn.btn-secondary(href="/vehicules/ajouter")
-      i(data-lucide="plus-circle", class="h-4 w-4 mr-2")
-      span Ajouter un véhicule
+    if clientId
+      a.btn.btn-secondary(href=`/vehicules/ajouter/${clientId}`)
+        i(data-lucide="plus-circle", class="h-4 w-4 mr-2")
+        span Ajouter un véhicule
   
   .card
-    .card-header.bg-muted-light.hidden.desktop-inline
-      .grid.grid-cols-1.grid-md-5.gap-4.items-center.w-full
-        .text-muted-foreground Véhicule
-        .text-muted-foreground Immatriculation
-        .text-muted-foreground Année
-        .text-muted-foreground Propriétaire
-        .text-muted-foreground.text-right Actions
+    .card-header.bg-muted-light
+      .grid.grid-cols-1.grid-md-6.gap-4.items-center.w-full.px-4.py-2
+        .text-sm.font-medium Véhicule
+        .text-sm.font-medium Immatriculation
+        .text-sm.font-medium Année
+        .text-sm.font-medium Propriétaire
+        .text-sm.font-medium Interventions
+        .text-sm.font-medium.text-left Actions
     
     if vehicules && vehicules.length > 0
       ul.divide-y.divide-border
         each vehicule in vehicules
           .py-4.px-4.transition.hover-bg-muted
-            .grid.grid-cols-1.grid-md-5.gap-4.items-center
+            .grid.grid-cols-1.grid-md-6.gap-4.items-center
               .flex.flex-col
-                h5.font-medium.text-lg.mb-0 #{vehicule.Marque} #{vehicule.Modele}
+                h5.font-medium.text-lg.mb-0 #{vehicule.marque} #{vehicule.modele}
               
               div
-                span.badge.badge-outline.px-3.py-1 #{vehicule.Immatriculation}
+                span.badge.badge-outline.px-3.py-1 #{vehicule.immatriculation}
               
               div
-                span #{vehicule.Annee || 'Non renseignée'}
+                span #{vehicule.annee || 'Non renseignée'}
               
               div
-                a.text-primary.hover-underline(href=`/clients/${vehicule.ClientID}`) #{vehicule.Proprietaire}
+                a.text-primary.hover-underline(href=`/clients/${vehicule.clientid}`) #{vehicule.proprietaire}
+              
+              .flex.items-center.gap-2
+                if vehicule.interventions_en_cours > 0
+                  span.badge.badge-warning #{vehicule.interventions_en_cours} en cours
+                if vehicule.interventions_terminees > 0
+                  span.badge.badge-success #{vehicule.interventions_terminees} terminées
+                if vehicule.interventions_en_cours === 0 && vehicule.interventions_terminees === 0
+                  span.badge.badge-outline Aucune intervention
               
               .flex.items-center.justify-end.gap-2.order-first-mobile
-                a.btn.btn-primary.btn-sm(href=`/vehicules/${vehicule.VehiculeID}`)
+                a.btn.btn-primary.btn-sm(href=`/vehicules/${vehicule.id}`)
                   i(data-lucide="eye", class="h-4 w-4 mr-1")
                   span.hidden.desktop-inline Détails
-                a.btn.btn-accent.btn-sm(href=`/interventions/planifier?vehiculeId=${vehicule.VehiculeID}&clientId=${vehicule.ClientID}`)
-  i(data-lucide="calendar-plus", class="h-4 w-4 mr-1")
-  span.hidden.desktop-inline Intervention
+                a.btn.btn-accent.btn-sm(href=`/interventions/planifier?vehiculeId=${vehicule.id}&clientId=${vehicule.clientid}`)
+                  i(data-lucide="calendar-plus", class="h-4 w-4 mr-1")
+                  span.hidden.desktop-inline Intervention
     else
       .p-8.text-center
         i(data-lucide="car", class="h-10 w-10 mx-auto mb-3 text-muted-foreground")

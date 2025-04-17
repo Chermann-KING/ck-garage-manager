@@ -38,7 +38,7 @@ class InterventionsController {
       }
 
       res.render("interventions/details", {
-        title: `Intervention #${intervention.InterventionID}`,
+        title: `Intervention #${intervention.interventionid}`,
         intervention,
       });
     } catch (error) {
@@ -54,69 +54,63 @@ class InterventionsController {
   // Afficher le formulaire de planification d'une intervention
   async showPlanifierInterventionForm(req, res) {
     try {
+      console.log("Début du chargement du formulaire");
+      console.log("Query params:", req.query);
+
       // Récupérer les types d'interventions pour le formulaire
       const typesInterventions =
         await interventionsService.getAllInterventionTypes();
+      console.log("Types d'interventions récupérés:", typesInterventions);
+
+      // Récupérer la liste des véhicules
+      const vehicules = await vehiculesService.getAllVehicules();
+      console.log("Véhicules récupérés:", vehicules);
 
       // Si un ID véhicule est fourni, on le récupère pour pré-sélectionner
       let vehicule = null;
       let client = null;
 
       if (req.query.vehiculeId) {
-        const vehiculeId = parseInt(req.query.vehiculeId);
-        vehicule = await vehiculesService.getVehiculeById(vehiculeId);
+        console.log("VehiculeID fourni:", req.query.vehiculeId);
+        vehicule = await vehiculesService.getVehiculeById(
+          parseInt(req.query.vehiculeId)
+        );
+        console.log("Véhicule récupéré:", vehicule);
 
-        if (vehicule && vehicule.ClientID) {
-          try {
-            // Récupérer le client associé au véhicule, avec gestion d'erreur
-            client = await clientsService.getClientById(vehicule.ClientID);
-          } catch (clientError) {
-            console.warn(
-              `Impossible de récupérer le client pour le véhicule ${vehiculeId}:`,
-              clientError
-            );
-            // On continue sans informations client, sans faire échouer la requête
-          }
+        if (vehicule) {
+          client = await clientsService.getClientById(vehicule.clientid);
+          console.log("Client récupéré:", client);
         }
-      }
-      // Si un ID client est fourni directement, on le récupère également
-      else if (req.query.clientId) {
-        try {
-          const clientId = parseInt(req.query.clientId);
-          client = await clientsService.getClientById(clientId);
-        } catch (clientError) {
-          console.warn(
-            `Impossible de récupérer le client ${req.query.clientId}:`,
-            clientError
-          );
-          // On continue sans client
-        }
-      }
-
-      // Si pas de véhicule spécifié, récupérer tous les véhicules pour le menu déroulant
-      let vehicules = [];
-      if (!vehicule) {
-        vehicules = await vehiculesService.getAllVehicules();
       }
 
       // Date d'aujourd'hui formatée pour le champ date
       const today = new Date().toISOString().split("T")[0];
 
-      res.render("interventions/form", {
+      const viewData = {
         title: "Planifier une intervention",
         intervention: {
-          VehiculeID: vehicule ? vehicule.VehiculeID : "",
-          Date_Intervention: today,
-          Statut: "Planifié",
+          vehicule_id: vehicule ? vehicule.id : "",
+          date_intervention: today,
+          statut: "Planifié",
+          description: "",
+          prix: "",
         },
-        typesInterventions,
-        vehicules,
+        typesInterventions: typesInterventions.map((type) => ({
+          id: type.typeid,
+          nom: type.nom,
+          description: type.description,
+          prix_base: type.prix_base,
+        })),
+        vehicules: vehicules,
         selectedVehicule: vehicule,
         selectedClient: client,
         isNew: true,
-      });
+      };
+
+      console.log("Données pour la vue:", viewData);
+      res.render("interventions/form", viewData);
     } catch (error) {
-      console.error("Erreur dans showPlanifierInterventionForm:", error);
+      console.error("Erreur lors du chargement du formulaire:", error);
       res.status(500).render("error", {
         title: "Erreur",
         message: "Une erreur est survenue lors du chargement du formulaire",
@@ -127,8 +121,10 @@ class InterventionsController {
   // Traiter la planification d'une intervention
   async planifierIntervention(req, res) {
     try {
+      console.log("Données reçues du formulaire:", req.body);
+
       // Récupérer le prix de base du type d'intervention
-      const typeId = parseInt(req.body.typeId);
+      const typeId = parseInt(req.body.type_id);
       let prix = null;
 
       // Si un prix personnalisé est fourni
@@ -140,13 +136,15 @@ class InterventionsController {
       }
 
       const interventionData = {
-        vehiculeId: parseInt(req.body.vehiculeId),
-        typeId: typeId,
-        dateIntervention: req.body.dateIntervention,
+        vehicule_id: parseInt(req.body.vehicule_id),
+        type_id: typeId,
+        date_intervention: req.body.date_intervention,
         statut: req.body.statut || "Planifié",
         prix: prix,
-        description: req.body.description || "",
+        description: req.body.description || null,
       };
+
+      console.log("Données préparées pour le service:", interventionData);
 
       const interventionId = await interventionsService.planifierIntervention(
         interventionData
@@ -159,41 +157,45 @@ class InterventionsController {
 
       // Rediriger vers la page de l'intervention ou vers la page du véhicule
       if (req.body.returnToVehicule) {
-        res.redirect(`/vehicules/${interventionData.vehiculeId}`);
+        res.redirect(`/vehicules/${interventionData.vehicule_id}`);
       } else {
         res.redirect(`/interventions/${interventionId}`);
       }
     } catch (error) {
       console.error("Erreur dans planifierIntervention:", error);
 
-      try {
-        // Récupérer à nouveau les données nécessaires pour le formulaire
-        const typesInterventions =
-          await interventionsService.getAllInterventionTypes();
-        const vehicules = await vehiculesService.getAllVehicules();
+      // Récupérer à nouveau les données nécessaires pour le formulaire
+      const typesInterventions =
+        await interventionsService.getAllInterventionTypes();
+      let vehicule = null;
+      let client = null;
 
-        res.render("interventions/form", {
-          title: "Planifier une intervention",
-          intervention: {
-            VehiculeID: req.body.vehiculeId,
-            Date_Intervention: req.body.dateIntervention,
-            Statut: req.body.statut || "Planifié",
-            Description: req.body.description,
-          },
-          typesInterventions,
-          vehicules,
-          selectedTypeId: req.body.typeId,
-          isNew: true,
-          error:
-            "Une erreur est survenue lors de la planification de l'intervention",
-        });
-      } catch (err) {
-        res.status(500).render("error", {
-          title: "Erreur",
-          message:
-            "Une erreur est survenue lors de la planification de l'intervention",
-        });
+      if (req.body.vehicule_id) {
+        vehicule = await vehiculesService.getVehiculeById(
+          parseInt(req.body.vehicule_id)
+        );
+        if (vehicule) {
+          client = await clientsService.getClientById(vehicule.clientid);
+        }
       }
+
+      res.render("interventions/form", {
+        title: "Planifier une intervention",
+        intervention: {
+          vehicule_id: req.body.vehicule_id,
+          type_id: req.body.type_id,
+          date_intervention: req.body.date_intervention,
+          statut: req.body.statut || "Planifié",
+          description: req.body.description,
+          prix: req.body.prix,
+        },
+        typesInterventions,
+        selectedVehicule: vehicule,
+        selectedClient: client,
+        isNew: true,
+        error:
+          "Une erreur est survenue lors de la planification de l'intervention",
+      });
     }
   }
 
@@ -213,7 +215,7 @@ class InterventionsController {
       }
 
       res.render("interventions/update-status", {
-        title: `Mettre à jour le statut - Intervention #${intervention.InterventionID}`,
+        title: `Mettre à jour le statut - Intervention #${intervention.interventionid}`,
         intervention,
         statuts: [
           "Planifié",
@@ -263,8 +265,8 @@ class InterventionsController {
           title: `Mettre à jour le statut - Intervention #${req.params.id}`,
           intervention: {
             ...intervention,
-            Statut: req.body.statut,
-            Description: req.body.description,
+            statut: req.body.statut,
+            description: req.body.description,
           },
           statuts: [
             "Planifié",

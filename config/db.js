@@ -1,24 +1,19 @@
-const sql = require("mssql");
-
-const { DB_USER, DB_PASSWORD, DB_SERVER, DB_DATABASE, DB_PORT } = process.env;
-
-const dbConfig = {
-  user: DB_USER,
-  password: DB_PASSWORD,
-  server: DB_SERVER,
-  database: DB_DATABASE,
-  options: {
-    trustServerCertificate: true,
-  },
-  port: parseInt(DB_PORT),
-};
+const supabase = require("./supabase");
 
 async function connectToDatabase() {
   try {
-    console.log("Tentative de connexion à SQL Server...");
-    const pool = await sql.connect(dbConfig);
-    console.log("Connecté à la base de données SQL Server");
-    return pool;
+    console.log("Tentative de connexion à Supabase...");
+
+    // Test de connexion
+    const { data, error } = await supabase
+      .from("clients")
+      .select("count")
+      .single();
+
+    if (error) throw error;
+
+    console.log("Connecté à la base de données Supabase");
+    return supabase;
   } catch (error) {
     console.error("Erreur de connexion à la base de données:", error);
     throw error;
@@ -27,5 +22,5 @@ async function connectToDatabase() {
 
 module.exports = {
   connectToDatabase,
-  sql,
+  supabase,
 };

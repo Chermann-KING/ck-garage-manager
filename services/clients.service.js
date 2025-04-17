@@ -1,119 +1,175 @@
-const { connectToDatabase, sql } = require("../config/db");
+const supabase = require("../config/supabase");
 
 class ClientsService {
   // Récupérer tous les clients avec leurs véhicules
   async getAllClients() {
     try {
-      const pool = await connectToDatabase();
-      const result = await pool.request().query(`
-        SELECT c.*, 
-               COUNT(v.VehiculeID) AS NombreVehicules
-        FROM Clients c
-        LEFT JOIN Vehicules v ON c.ClientID = v.ClientID
-        GROUP BY c.ClientID, c.Nom, c.Prenom, c.Telephone, c.Email
-        ORDER BY c.Nom, c.Prenom
-      `);
-      return result.recordset;
+      console.log("[ClientsService] Tentative de récupération des clients...");
+
+      const { data: clientsData, error } = await supabase
+        .from("clients")
+        .select(
+          `
+          *,
+          nombre_vehicules:vehicules(count)
+        `
+        )
+        .order("nom");
+
+      if (error) {
+        console.error("[ClientsService] Erreur Supabase:", error);
+        throw error;
+      }
+
+      console.log("[ClientsService] Données reçues:", clientsData);
+
+      // Transformer les données pour correspondre au format attendu
+      const clients = clientsData.map((client) => ({
+        clientid: client.clientid,
+        nom: client.nom,
+        prenom: client.prenom,
+        email: client.email,
+        telephone: client.telephone,
+        nombre_vehicules: client.nombre_vehicules[0].count,
+      }));
+
+      console.log("[ClientsService] Données transformées:", clients);
+      return clients;
     } catch (error) {
-      console.error("Erreur lors de la récupération des clients:", error);
+      console.error("[ClientsService] Erreur détaillée:", error);
       throw error;
     }
   }
 
   // Récupérer un client par son ID avec ses véhicules
-  async getClientById(clientId) {
+  async getClientById(id) {
     try {
-      const pool = await connectToDatabase();
+      console.log("[ClientsService] Récupération du client:", id);
+      const { data: client, error } = await supabase
+        .from("clients")
+        .select(
+          `
+          *,
+          vehicules (
+            vehiculeid,
+            marque,
+            modele,
+            annee,
+            immatriculation,
+            interventions (
+              statut
+            )
+          )
+        `
+        )
+        .eq("clientid", id)
+        .single();
 
-      // Récupérer les infos du client
-      const clientResult = await pool
-        .request()
-        .input("clientId", sql.Int, clientId).query(`
-          SELECT * FROM Clients
-          WHERE ClientID = @clientId
-        `);
-
-      if (clientResult.recordset.length === 0) {
-        return null;
+      if (error) {
+        console.error(
+          "[ClientsService] Erreur lors de la récupération du client:",
+          error
+        );
+        throw error;
       }
 
-      const client = clientResult.recordset[0];
+      console.log("[ClientsService] Client récupéré:", client);
 
-      // Récupérer les véhicules du client
-      const vehiculesResult = await pool
-        .request()
-        .input("clientId", sql.Int, clientId).query(`
-          SELECT * FROM Vehicules
-          WHERE ClientID = @clientId
-        `);
+      // Traiter les interventions pour chaque véhicule
+      const vehiculesWithInterventions = client.vehicules.map((vehicule) => {
+        const interventions_en_cours =
+          vehicule.interventions?.filter((i) => i.statut === "En cours")
+            .length || 0;
+        const interventions_terminees =
+          vehicule.interventions?.filter((i) => i.statut === "Terminé")
+            .length || 0;
 
-      client.vehicules = vehiculesResult.recordset;
+        return {
+          vehiculeid: vehicule.vehiculeid,
+          marque: vehicule.marque,
+          modele: vehicule.modele,
+          annee: vehicule.annee,
+          immatriculation: vehicule.immatriculation,
+          interventions_en_cours,
+          interventions_terminees,
+        };
+      });
 
-      // Récupérer l'historique des interventions pour les véhicules du client
-      const interventionsResult = await pool
-        .request()
-        .input("clientId", sql.Int, clientId).query(`
-          SELECT i.*, v.Immatriculation, v.Marque, v.Modele, ti.Nom AS TypeIntervention
-          FROM Interventions i
-          JOIN Vehicules v ON i.VehiculeID = v.VehiculeID
-          JOIN Types_Interventions ti ON i.TypeID = ti.TypeID
-          WHERE v.ClientID = @clientId
-          ORDER BY i.Date_Intervention DESC
-        `);
-
-      client.interventions = interventionsResult.recordset;
-
-      return client;
+      return {
+        clientid: client.clientid,
+        nom: client.nom,
+        prenom: client.prenom,
+        email: client.email,
+        telephone: client.telephone,
+        vehicules: vehiculesWithInterventions,
+      };
     } catch (error) {
-      console.error("Erreur lors de la récupération du client:", error);
+      console.error(
+        `[ClientsService] Erreur détaillée pour le client ${id}:`,
+        error
+      );
       throw error;
     }
   }
 
   // Ajouter un nouveau client
-  async addClient(clientData) {
+  async createClient(clientData) {
     try {
-      const pool = await connectToDatabase();
-      const result = await pool
-        .request()
-        .input("nom", sql.NVarChar, clientData.nom)
-        .input("prenom", sql.NVarChar, clientData.prenom)
-        .input("telephone", sql.NVarChar, clientData.telephone)
-        .input("email", sql.NVarChar, clientData.email).query(`
-          INSERT INTO Clients (Nom, Prenom, Telephone, Email)
-          OUTPUT INSERTED.ClientID
-          VALUES (@nom, @prenom, @telephone, @email)
-        `);
+      const { data: newClient, error } = await supabase
+        .from("clients")
+        .insert([
+          {
+            nom: clientData.nom,
+            prenom: clientData.prenom,
+            email: clientData.email,
+            telephone: clientData.telephone,
+          },
+        ])
+        .select()
+        .single();
 
-      return result.recordset[0].ClientID;
+      if (error) throw error;
+
+      return {
+        clientid: newClient.clientid,
+        nom: newClient.nom,
+        prenom: newClient.prenom,
+        email: newClient.email,
+        telephone: newClient.telephone,
+        nombre_vehicules: 0,
+      };
     } catch (error) {
-      console.error("Erreur lors de l'ajout du client:", error);
+      console.error("Erreur lors de la création du client:", error);
       throw error;
     }
   }
 
   // Mettre à jour un client existant
-  async updateClient(clientId, clientData) {
+  async updateClient(id, clientData) {
     try {
-      const pool = await connectToDatabase();
-      await pool
-        .request()
-        .input("clientId", sql.Int, clientId)
-        .input("nom", sql.NVarChar, clientData.nom)
-        .input("prenom", sql.NVarChar, clientData.prenom)
-        .input("telephone", sql.NVarChar, clientData.telephone)
-        .input("email", sql.NVarChar, clientData.email).query(`
-          UPDATE Clients
-          SET Nom = @nom,
-              Prenom = @prenom,
-              Telephone = @telephone,
-              Email = @email
-          WHERE ClientID = @clientId
-        `);
+      const { data: updatedClient, error } = await supabase
+        .from("clients")
+        .update({
+          nom: clientData.nom,
+          prenom: clientData.prenom,
+          email: clientData.email,
+          telephone: clientData.telephone,
+        })
+        .eq("clientid", id)
+        .select()
+        .single();
 
-      return true;
+      if (error) throw error;
+
+      return {
+        clientid: updatedClient.clientid,
+        nom: updatedClient.nom,
+        prenom: updatedClient.prenom,
+        email: updatedClient.email,
+        telephone: updatedClient.telephone,
+      };
     } catch (error) {
-      console.error("Erreur lors de la mise à jour du client:", error);
+      console.error(`Erreur lors de la mise à jour du client ${id}:`, error);
       throw error;
     }
   }
@@ -121,21 +177,50 @@ class ClientsService {
   // Trier les clients par nombre de véhicules
   async getClientsSortedByVehicleCount() {
     try {
-      const pool = await connectToDatabase();
-      const result = await pool.request().query(`
-        SELECT c.*, 
-               COUNT(v.VehiculeID) AS NombreVehicules
-        FROM Clients c
-        LEFT JOIN Vehicules v ON c.ClientID = v.ClientID
-        GROUP BY c.ClientID, c.Nom, c.Prenom, c.Telephone, c.Email
-        ORDER BY COUNT(v.VehiculeID) DESC, c.Nom, c.Prenom
-      `);
-      return result.recordset;
+      const { data: clientsData, error } = await supabase.from("clients")
+        .select(`
+          *,
+          nombre_vehicules:vehicules(count)
+        `);
+
+      if (error) throw error;
+
+      console.log("[ClientsService] Données reçues pour le tri:", clientsData);
+
+      // Transformer et trier les données
+      const sortedClients = clientsData
+        .map((client) => ({
+          clientid: client.clientid,
+          nom: client.nom,
+          prenom: client.prenom,
+          email: client.email,
+          telephone: client.telephone,
+          nombre_vehicules: client.nombre_vehicules[0].count,
+        }))
+        .sort((a, b) => b.nombre_vehicules - a.nombre_vehicules);
+
+      console.log("[ClientsService] Données triées:", sortedClients);
+      return sortedClients;
     } catch (error) {
       console.error(
         "Erreur lors du tri des clients par nombre de véhicules:",
         error
       );
+      throw error;
+    }
+  }
+
+  async deleteClient(id) {
+    try {
+      const { error } = await supabase
+        .from("clients")
+        .delete()
+        .eq("clientid", id);
+
+      if (error) throw error;
+      return true;
+    } catch (error) {
+      console.error(`Erreur lors de la suppression du client ${id}:`, error);
       throw error;
     }
   }

@@ -15,41 +15,44 @@ block content
               i(data-lucide="alert-circle", class="h-5 w-5 mr-2 flex-shrink-0 mt-0.5")
               div #{error}
           
-          form(method="POST", action="/vehicules/ajouter")
+          form(method="POST", action=isNew ? `/vehicules/ajouter/${vehicule.clientid}` : `/vehicules/${vehicule.id}/modifier`)
+            if !isNew
+              input(type="hidden", name="_method", value="PUT")
+            
             .space-y-2.mb-4
-              label.form-label(for="clientId") Propriétaire *
-              select#clientId.form-select(name="clientId", required)
-                option(value="", disabled, selected=!vehicule.ClientID) Sélectionnez un client
-                each client in clients
-                  option(value=client.ClientID, selected=vehicule.ClientID == client.ClientID) #{client.Prenom} #{client.Nom}
+              label.form-label(for="clientid") Propriétaire *
+              if isNew
+                input(type="hidden", name="clientid", value=vehicule.clientid)
+                p.form-control-static #{selectedClient ? `${selectedClient.prenom} ${selectedClient.nom}` : ''}
+              else
+                select#clientid.form-select(name="clientid", required)
+                  option(value="", disabled, selected=!vehicule.clientid) Sélectionnez un client
+                  each client in clients
+                    option(value=client.clientid, selected=vehicule.clientid == client.clientid) #{client.prenom} #{client.nom}
             
             .grid.grid-cols-1.grid-md-2.gap-4.mb-4
               .space-y-2
                 label.form-label(for="marque") Marque *
-                input#marque.form-control(type="text", name="marque", value=vehicule.Marque || '', required)
+                input#marque.form-control(type="text", name="marque", value=vehicule.marque || '', required)
               .space-y-2
                 label.form-label(for="modele") Modèle *
-                input#modele.form-control(type="text", name="modele", value=vehicule.Modele || '', required)
+                input#modele.form-control(type="text", name="modele", value=vehicule.modele || '', required)
             
             .grid.grid-cols-1.grid-md-2.gap-4.mb-4
               .space-y-2
                 label.form-label(for="immatriculation") Immatriculation *
-                input#immatriculation.form-control(type="text", name="immatriculation", value=vehicule.Immatriculation || '', required)
+                input#immatriculation.form-control(type="text", name="immatriculation", value=vehicule.immatriculation || '', required)
               .space-y-2
                 label.form-label(for="annee") Année
-                input#annee.form-control(type="number", name="annee", min="1900", max="2100", value=vehicule.Annee || '')
+                input#annee.form-control(type="number", name="annee", min="1900", max="2100", value=vehicule.annee || '')
             
             if selectedClient
-              .mb-4
-                .flex.items-center
-                  input#returnToClient.mr-2(type="checkbox", name="returnToClient", value="1", checked)
-                  label.form-label.mb-0(for="returnToClient") Retourner à la fiche client après l'ajout
-                input(type="hidden", name="clientIdRedirect", value=selectedClient.ClientID)
+              input(type="hidden", name="returnToClient", value="1")
             
             .flex.justify-between.mt-6
-              a.btn.btn-outline(href=selectedClient ? `/clients/${selectedClient.ClientID}` : "/vehicules")
+              a.btn.btn-outline(href=selectedClient ? `/clients/${selectedClient.clientid}` : "/vehicules")
                 i(data-lucide="x", class="h-4 w-4 mr-2")
                 span Annuler
               button.btn.btn-secondary(type="submit")
                 i(data-lucide="check", class="h-4 w-4 mr-2")
-                span Ajouter le véhicule
+                span #{isNew ? 'Ajouter le véhicule' : 'Modifier le véhicule'}

@@ -7,7 +7,7 @@ block content
         .card-header.bg-accent.text-accent-foreground
           .flex.items-center
             i(data-lucide="refresh-cw", class="h-5 w-5 mr-2")
-            h3.font-semibold.text-lg Mise à jour du statut - Intervention ##{intervention.InterventionID}
+            h3.font-semibold.text-lg Mise à jour du statut - Intervention ##{intervention.interventionid}
       
         .card-body
           if error
@@ -22,39 +22,39 @@ block content
                 p.mb-1.flex.items-center
                   i(data-lucide="car", class="h-4 w-4 mr-2 text-muted-foreground")
                   strong.mr-1 Véhicule:
-                  |  #{intervention.Marque} #{intervention.Modele} - #{intervention.Immatriculation}
+                  |  #{intervention.marque} #{intervention.modele} - #{intervention.immatriculation}
                 p.mb-1.flex.items-center
                   i(data-lucide="user", class="h-4 w-4 mr-2 text-muted-foreground")
                   strong.mr-1 Propriétaire:
-                  |  #{intervention.Proprietaire}
+                  |  #{intervention.proprietaire}
               div
                 p.mb-1.flex.items-center
                   i(data-lucide="tool", class="h-4 w-4 mr-2 text-muted-foreground")
                   strong.mr-1 Type:
-                  |  #{intervention.TypeIntervention}
+                  |  #{intervention.type_intervention}
                 p.mb-1.flex.items-center
                   i(data-lucide="calendar", class="h-4 w-4 mr-2 text-muted-foreground")
                   strong.mr-1 Date:
-                  |  #{new Date(intervention.Date_Intervention).toLocaleDateString('fr-FR')}
+                  |  #{new Date(intervention.date_intervention).toLocaleDateString('fr-FR')}
             .flex.items-center
               p.mb-0.flex.items-center
                 strong.mr-1 Statut actuel:
-                span.badge.ml-2(class=`badge-${intervention.Statut === 'Terminé' ? 'secondary' : intervention.Statut === 'En cours' ? 'primary' : intervention.Statut === 'Planifié' ? 'badge-Planifié' : 'badge-outline'}`) #{intervention.Statut}
+                span.badge.ml-2(class=`badge-${intervention.statut === 'Terminé' ? 'secondary' : intervention.statut === 'En cours' ? 'primary' : intervention.statut === 'Planifié' ? 'badge-Planifié' : 'badge-outline'}`) #{intervention.statut}
           
-          form(method="POST", action=`/interventions/${intervention.InterventionID}/statut`)
+          form(method="POST", action=`/interventions/${intervention.interventionid}/statut`)
             .space-y-2.mb-4
               label.form-label(for="statut") Nouveau statut *
               select#statut.form-select(name="statut", required)
                 each statut in statuts
-                  option(value=statut, selected=intervention.Statut === statut) #{statut}
+                  option(value=statut, selected=intervention.statut === statut) #{statut}
             
             .space-y-2.mb-4
               label.form-label(for="description") Description / Commentaire
-              textarea#description.form-control(name="description", rows="4")= intervention.Description
+              textarea#description.form-control(name="description", rows="4")= intervention.description
               small.text-sm.text-muted-foreground Ajoutez un commentaire ou modifiez la description existante
             
             .flex.justify-between.mt-6
-              a.btn.btn-outline(href=`/interventions/${intervention.InterventionID}`)
+              a.btn.btn-outline(href=`/interventions/${intervention.interventionid}`)
                 i(data-lucide="x", class="h-4 w-4 mr-2")
                 span Annuler
               button.btn.btn-accent(type="submit")

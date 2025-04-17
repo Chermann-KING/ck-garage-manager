@@ -6,9 +6,9 @@ block content
       .flex.justify-between.items-center
         .flex.items-center
           i(data-lucide="car", class="h-5 w-5 mr-2")
-          h3.font-semibold.text-lg #{vehicule.Marque} #{vehicule.Modele}
+          h3.font-semibold.text-lg #{vehicule.marque} #{vehicule.modele}
         .flex.gap-2
-          a.btn.btn-accent.btn-sm(href=`/interventions/planifier?vehiculeId=${vehicule.VehiculeID}`)
+          a.btn.btn-accent.btn-sm(href=`/interventions/planifier?vehiculeId=${vehicule.id}`)
             i(data-lucide="calendar-plus", class="h-4 w-4 mr-1")
             span Planifier intervention
           a.btn.btn-ghost.text-secondary-foreground.btn-sm(href='/vehicules')
@@ -21,66 +21,69 @@ block content
           i(data-lucide="tag", class="h-5 w-5 mr-2 text-muted-foreground")
           div
             p.font-medium.mb-1 Immatriculation
-            .badge.badge-outline.px-3.py-2 #{vehicule.Immatriculation}
+            .badge.badge-outline.px-3.py-2 #{vehicule.immatriculation}
         
         .flex.items-center
           i(data-lucide="calendar", class="h-5 w-5 mr-2 text-muted-foreground")
           div
             p.font-medium.mb-1 Année
-            span.text-lg #{vehicule.Annee || 'Non renseignée'}
+            span.text-lg #{vehicule.annee || 'Non renseignée'}
         
         .flex.items-center
           i(data-lucide="user", class="h-5 w-5 mr-2 text-muted-foreground")
           div
             p.font-medium.mb-1 Propriétaire
-            a.text-primary.link-hover.text-lg(href=`/clients/${vehicule.ClientID}`) #{vehicule.Proprietaire}
+            a.text-primary.link-hover.text-lg(href=`/clients/${vehicule.clientid}`) #{vehicule.proprietaire}
         
         .flex.items-center
           i(data-lucide="hash", class="h-5 w-5 mr-2 text-muted-foreground")
           div
             p.font-medium.mb-1 ID Véhicule
-            span.text-muted-foreground #{vehicule.VehiculeID}
+            span.text-muted-foreground #{vehicule.id}
   
   .flex.items-center.justify-between.mb-4
     .flex.items-center
       i(data-lucide="wrench", class="h-5 w-5 mr-2 text-accent")
       h3.text-xl.font-semibold Historique des interventions
     
-    a.btn.btn-accent(href=`/interventions/planifier?vehiculeId=${vehicule.VehiculeID}`)
+    a.btn.btn-accent(href=`/interventions/planifier?vehiculeId=${vehicule.id}`)
       i(data-lucide="plus-circle", class="h-4 w-4 mr-2")
       span Nouvelle intervention
   
-  if interventions && interventions.length > 0
+  if vehicule.interventions && vehicule.interventions.length > 0
     .table-responsive
       table.table.table-striped
         thead
           tr
             th Date
-            th Type
+            th
+              .flex.items-center
+                i(data-lucide="wrench", class="h-4 w-4 mr-2")
+                | Type
             th Statut
             th.text-right Prix
             th Description
             th Actions
         tbody
-          each intervention in interventions
+          each intervention in vehicule.interventions
             tr
-              td #{new Date(intervention.Date_Intervention).toLocaleDateString('fr-FR')}
-              td #{intervention.TypeIntervention}
+              td #{new Date(intervention.date).toLocaleDateString('fr-FR')}
+              td #{intervention.type}
               td 
-                span.badge(class=`${intervention.Statut === 'Terminé' ? 'badge-secondary' : intervention.Statut === 'En cours' ? 'badge-primary' : intervention.Statut === 'Planifié' ? 'badge-Planifié' : 'badge-outline'}`) #{intervention.Statut}
-              td.text-right #{intervention.Prix.toFixed(2)} €
+                span.badge(class=`${intervention.statut === 'Terminé' ? 'badge-success' : intervention.statut === 'En cours' ? 'badge-warning' : intervention.statut === 'Planifié' ? 'badge-info' : 'badge-outline'}`) #{intervention.statut}
+              td.text-right #{intervention.prix ? intervention.prix.toFixed(2) + ' €' : '-'}
               td.small.width-xs.text-ellipsis
-                if intervention.Description
-                  | #{intervention.Description.length > 50 ? intervention.Description.substring(0, 50) + '...' : intervention.Description}
+                if intervention.description
+                  | #{intervention.description.length > 50 ? intervention.description.substring(0, 50) + '...' : intervention.description}
                 else
                   span.text-muted-foreground Aucune
               td.no-wrap
                 .flex.gap-1
-                  a.btn.btn-primary.btn-sm(href=`/interventions/${intervention.InterventionID}`)
+                  a.btn.btn-primary.btn-sm(href=`/interventions/${intervention.id}`)
                     i(data-lucide="eye", class="h-4 w-4")
                     span.sr-only Détails
-                  if intervention.Statut !== 'Terminé' && intervention.Statut !== 'Annulé'
-                    a.btn.btn-accent.btn-sm(href=`/interventions/${intervention.InterventionID}/statut`)
+                  if intervention.statut !== 'Terminé' && intervention.statut !== 'Annulé'
+                    a.btn.btn-accent.btn-sm(href=`/interventions/${intervention.id}/statut`)
                       i(data-lucide="refresh-cw", class="h-4 w-4")
                       span.sr-only Changer statut
   else
